@@ -49,7 +49,7 @@ public class TorrentFileHandlerTester
 	{
 		torrent_file_handler = new TorrentFileHandler();
 		torrent_file = torrent_file_handler
-				.openTorrentFile("project1.torrent");
+				.openTorrentFile("project3.torrent");
 
 		if (torrent_file != null)
 		{
