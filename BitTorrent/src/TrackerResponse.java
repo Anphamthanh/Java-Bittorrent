@@ -6,16 +6,16 @@ public class TrackerResponse {
 	private int complete;
 	private int incomplete;
 	private int interval;
-	private HashMap<Byte[], Integer> peerList;
+	private HashMap<String, Integer> peerList;
 	
 	public TrackerResponse(int complete, int incomplete, int interval){
 		this.complete = complete;
 		this.incomplete = incomplete;
 		this.interval = interval;
-		this.peerList = new HashMap<Byte[], Integer>();
+		this.peerList = new HashMap<String, Integer>();
 	}
 	
-	public TrackerResponse(int complete, int incomplete, int interval, HashMap<Byte[], Integer> peerList){
+	public TrackerResponse(int complete, int incomplete, int interval, HashMap<String, Integer> peerList){
 		this.complete = complete;
 		this.incomplete = incomplete;
 		this.interval = interval;
@@ -46,15 +46,15 @@ public class TrackerResponse {
 		this.interval= interval;
 	}
 	
-	public HashMap<Byte[], Integer> getPeerList(){
+	public HashMap<String, Integer> getPeerList(){
 		return this.peerList;
 	}
 	
-	public void updatePeerList(HashMap<Byte[], Integer> peerList){
+	public void updatePeerList(HashMap<String, Integer> peerList){
 		this.peerList = peerList;
 	}
 	
-	public void addPeerInfo(Byte[] IP, int port){
+	public void addPeerInfo(String IP, int port){
 		peerList.put(IP, port);
 	}
 }

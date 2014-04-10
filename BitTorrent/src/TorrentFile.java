@@ -16,7 +16,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 //package main;
 
+import java.util.HashMap;
 import java.util.Vector;
+
 
 
 /**
@@ -73,6 +75,10 @@ public class TorrentFile
 	public Vector piece_hash_values_as_url;
 	
 	/**
+	 * The collection of peer list
+	 */
+	public HashMap peer_list;
+	/**
 	 * Creates a new TorrentFile object with empty fields.
 	 *
 	 */
@@ -86,6 +92,7 @@ public class TorrentFile
 		info_hash_as_binary = new byte[20];
 		info_hash_as_url = new String();
 		info_hash_as_hex = new String();
+		peer_list = new HashMap();
 		file_length = -1;
 		piece_length = -1;
 	}	

@@ -49,7 +49,7 @@ public class TorrentFileHandlerTester
 	{
 		torrent_file_handler = new TorrentFileHandler();
 		torrent_file = torrent_file_handler
-				.openTorrentFile("project3.torrent");
+				.openTorrentFile("torrent_samples/xubuntu-13.10-desktop-i386.iso.torrent");
 
 		if (torrent_file != null)
 		{
