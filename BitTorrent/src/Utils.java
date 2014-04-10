@@ -1,6 +1,11 @@
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -72,11 +77,15 @@ public class Utils {
 	 * @return port number in int from the bytes 
 	 */
 	private int parsePort(char high, char low){
-		int retVal = 0;
-		retVal = retVal | (int)(((high & 0xff) << 8) | (low & 0xff));
+		int retVal 	= 0;
+		retVal 		= retVal | (int)(((high & 0xff) << 8) | (low & 0xff));
 		return retVal;
 	}
 	
+	/**
+	 * Print out peer list
+	 * @param peerList
+	 */
 	public void dumpPeerList(HashMap<String, Integer> peerList){
 		Set<String> keys = peerList.keySet();
 		
@@ -85,7 +94,52 @@ public class Utils {
 		for(String itr: keys){
 			System.out.print(itr + ":" + peerList.get(itr) + "\n");
 		}
+	}
+	
+	private static Pattern pattern;
+	private static Matcher matcher;
+
+	private static final String IPADDRESS_PATTERN = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+
+	/**
+	 * Validate ip address with regular expression
+	 * 
+	 * @param ip
+	 *            ip address for validation
+	 * @return true valid ip address, false invalid ip address
+	 */
+	private static boolean validate(final String ip) {
+		pattern = Pattern.compile(IPADDRESS_PATTERN);
+		matcher = pattern.matcher(ip);
+		return matcher.matches();
+	}
+	
+	/**
+	 * Compute machine external IP that later used for compute peer ID
+	 * @return
+	 * @throws SocketException
+	 */
+	public String getIP() throws SocketException {
+		String ip = "";
+		Enumeration e = NetworkInterface.getNetworkInterfaces();
 		
+		while (e.hasMoreElements()) {
+			NetworkInterface n = (NetworkInterface) e.nextElement();
+			Enumeration ee = n.getInetAddresses();
+
+			while (ee.hasMoreElements()) {
+				InetAddress i = (InetAddress) ee.nextElement();
+				ip = i.getHostAddress();
+
+				if (validate(ip)) {
+					return ip;
+				}
+			}
+		}
 		
+		return ip;
 	}
 }
