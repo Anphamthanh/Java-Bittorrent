@@ -1,21 +1,28 @@
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Utils {
+import org.apache.commons.lang3.RandomStringUtils;
 
-	public TrackerResponse handleTrackerResponse(byte[] responseStream) {
+public class Utils {
+	
+	private static final String CLIENT_ID = "-AP6969-";
+	
+	@SuppressWarnings("unchecked")
+	public static TrackerResponse handleTrackerResponse(byte[] responseStream) {
 		
 		int complete, incomplete, interval;
-		Bencoder bencoder 					= new Bencoder();
-		HashMap reponseHashMap 				= new HashMap();
-		String rawPeerList	 				= "";
-		HashMap<String, Integer> peerList 	= new HashMap<String, Integer>();
+		Bencoder bencoder 						= new Bencoder();
+		HashMap<String, Object> reponseHashMap 	= new HashMap<String, Object>();
+		String rawPeerList	 					= "";
+		HashMap<String, Integer> peerList 		= new HashMap<String, Integer>();
 
 		reponseHashMap 	= bencoder.unbencodeDictionary(responseStream);		
 		complete 		= (int) reponseHashMap.get("complete");
@@ -35,7 +42,7 @@ public class Utils {
 	 * @param rawPeerList
 	 * @return
 	 */
-	private HashMap<String, Integer> parsePeerList(String rawPeerList) {
+	private static HashMap<String, Integer> parsePeerList(String rawPeerList) {
 		HashMap<String, Integer> retHashMap = new HashMap<String, Integer>();
 		char[] charStream = rawPeerList.toCharArray();
 		int i = 0;
@@ -63,7 +70,7 @@ public class Utils {
 	 * @param char to be converted
 	 * @return
 	 */
-	private int charToUnsignedInt(char c){
+	private static int charToUnsignedInt(char c){
 		return (int)((c) & 0xFF);
 	}
 
@@ -76,7 +83,7 @@ public class Utils {
 	 *            char
 	 * @return port number in int from the bytes 
 	 */
-	private int parsePort(char high, char low){
+	private static int parsePort(char high, char low){
 		int retVal 	= 0;
 		retVal 		= retVal | (int)(((high & 0xff) << 8) | (low & 0xff));
 		return retVal;
@@ -86,7 +93,7 @@ public class Utils {
 	 * Print out peer list
 	 * @param peerList
 	 */
-	public void dumpPeerList(HashMap<String, Integer> peerList){
+	public static void dumpPeerList(HashMap<String, Integer> peerList){
 		Set<String> keys = peerList.keySet();
 		
 		System.out.println("IP:port");
@@ -122,16 +129,16 @@ public class Utils {
 	 * @return
 	 * @throws SocketException
 	 */
-	public String getIP() throws SocketException {
+	public static String getIP() throws SocketException {
 		String ip = "";
-		Enumeration e = NetworkInterface.getNetworkInterfaces();
+		Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
 		
 		while (e.hasMoreElements()) {
-			NetworkInterface n = (NetworkInterface) e.nextElement();
-			Enumeration ee = n.getInetAddresses();
+			NetworkInterface n = e.nextElement();
+			Enumeration<InetAddress> ee = n.getInetAddresses();
 
 			while (ee.hasMoreElements()) {
-				InetAddress i = (InetAddress) ee.nextElement();
+				InetAddress i = ee.nextElement();
 				ip = i.getHostAddress();
 
 				if (validate(ip)) {
@@ -142,4 +149,155 @@ public class Utils {
 		
 		return ip;
 	}
+
+	/**
+	 * compute Peer Id from ip and port
+	 * @param port
+	 * @param ip
+	 * @return
+	 */
+	public static String calculatePeerID(int port, String ip) {
+		String peerID = "";
+		String buffer = port + ip;
+		byte[] hash = generateSHA1Hash(stringToBytesASCII(buffer));
+		byte[] twelveBytesHash = new byte[12];
+		System.arraycopy(hash, 7, twelveBytesHash, 0, 12);
+		
+		peerID = CLIENT_ID;// + byteArrayToByteString(twelveBytesHash);
+		
+		for (int i = 0; i < twelveBytesHash.length; i++){
+			peerID = Byte.toString(twelveBytesHash[i]);
+		}
+
+		return peerID;
+	}
+	
+	/**
+	 * Calculate PeerID
+	 * @return
+	 */
+	public static String calculatePeerID() {
+		String peerID = CLIENT_ID + RandomStringUtils.randomAlphanumeric(12);
+		return peerID;
+	}
+	
+	private static byte[] stringToBytesASCII(String str) {
+		char[] buffer = str.toCharArray();
+		byte[] b = new byte[buffer.length];
+		for (int i = 0; i < b.length; i++) {
+			b[i] = (byte) buffer[i];
+		}
+		return b;
+	}
+	
+	/*
+	 * Stolen from byteArrayToByteString
+	 */
+	public static String byteArrayToURLString(byte in[])
+	{
+		byte ch = 0x00;
+		int i = 0;
+		if (in == null || in.length <= 0)
+			return null;
+
+		String pseudo[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+				"A", "B", "C", "D", "E", "F" };
+		StringBuffer out = new StringBuffer(in.length * 2);
+
+		while (i < in.length)
+		{
+			// First check to see if we need ASCII or HEX
+			if ((in[i] >= '0' && in[i] <= '9')
+					|| (in[i] >= 'a' && in[i] <= 'z')
+					|| (in[i] >= 'A' && in[i] <= 'Z') || in[i] == '$'
+					|| in[i] == '-' || in[i] == '_' || in[i] == '.'
+					|| in[i] == '+' || in[i] == '!')
+			{
+				out.append((char) in[i]);
+				i++;
+			}
+			else
+			{
+				out.append('%');
+				ch = (byte) (in[i] & 0xF0); // Strip off high nibble
+				ch = (byte) (ch >>> 4); // shift the bits down
+				ch = (byte) (ch & 0x0F); // must do this is high order bit is
+				// on!
+				out.append(pseudo[(int) ch]); // convert the nibble to a
+				// String Character
+				ch = (byte) (in[i] & 0x0F); // Strip off low nibble
+				out.append(pseudo[(int) ch]); // convert the nibble to a
+				// String Character
+				i++;
+			}
+		}
+
+		String rslt = new String(out);
+
+		return rslt;
+
+	}
+
+	/**
+	 * 
+	 * Convert a byte[] array to readable string format. This makes the "hex"
+	 * readable!
+	 * 
+	 * @author Jeff Boyle
+	 * 
+	 * @return result String buffer in String format
+	 * 
+	 * @param in
+	 *            byte[] buffer to convert to string format
+	 * 
+	 */
+	// Taken from http://www.devx.com/tips/Tip/13540
+	public static String byteArrayToByteString(byte in[])
+	{
+		byte ch = 0x00;
+		int i = 0;
+		if (in == null || in.length <= 0)
+			return null;
+
+		String pseudo[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+				"A", "B", "C", "D", "E", "F" };
+		StringBuffer out = new StringBuffer(in.length * 2);
+
+		while (i < in.length)
+		{
+			ch = (byte) (in[i] & 0xF0); // Strip off high nibble
+			ch = (byte) (ch >>> 4); // shift the bits down
+			ch = (byte) (ch & 0x0F); // must do this is high order bit is on!
+			out.append(pseudo[(int) ch]); // convert the nibble to a String
+			// Character
+			ch = (byte) (in[i] & 0x0F); // Strip off low nibble
+			out.append(pseudo[(int) ch]); // convert the nibble to a String
+			// Character
+			i++;
+		}
+
+		String rslt = new String(out);
+
+		return rslt;
+	}
+
+	public static byte[] generateSHA1Hash(byte[] bytes)
+	{
+		try
+		{
+			byte[] hash = new byte[20];
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			hash = sha.digest(bytes);
+			
+			return hash;
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			System.err
+					.println("Error: [TorrentFileHandler.java] \"SHA-1\" is not a valid algorithm name.");
+			System.exit(1);
+		}
+		return null;
+	}
+	
 }

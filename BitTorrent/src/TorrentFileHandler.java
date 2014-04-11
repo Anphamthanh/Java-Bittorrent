@@ -486,9 +486,9 @@ public class TorrentFileHandler
 						{
 							info[i] = data[old_index + i];
 						}
-						torrent_file.info_hash_as_binary = generateSHA1Hash(info);
-						torrent_file.info_hash_as_url = byteArrayToURLString(torrent_file.info_hash_as_binary);
-						torrent_file.info_hash_as_hex = byteArrayToByteString(torrent_file.info_hash_as_binary);
+						torrent_file.info_hash_as_binary = Utils.generateSHA1Hash(info);
+						torrent_file.info_hash_as_url = Utils.byteArrayToURLString(torrent_file.info_hash_as_binary);
+						torrent_file.info_hash_as_hex = Utils.byteArrayToByteString(torrent_file.info_hash_as_binary);
 					}
 					else
 					{
@@ -576,120 +576,12 @@ public class TorrentFileHandler
 				individual_hash[j] = binary_data[(20*i)+j];
 			}
 			torrent_file.piece_hash_values_as_binary.add(individual_hash);
-			torrent_file.piece_hash_values_as_hex.add(byteArrayToByteString(individual_hash));
-			torrent_file.piece_hash_values_as_url.add(byteArrayToURLString(individual_hash));
+			torrent_file.piece_hash_values_as_hex.add(Utils.byteArrayToByteString(individual_hash));
+			torrent_file.piece_hash_values_as_url.add(Utils.byteArrayToURLString(individual_hash));
 		}
 		
 		return true;
 	}
 
-	/*
-	 * Stolen from byteArrayToByteString
-	 */
-	private static String byteArrayToURLString(byte in[])
-	{
-		byte ch = 0x00;
-		int i = 0;
-		if (in == null || in.length <= 0)
-			return null;
 
-		String pseudo[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-				"A", "B", "C", "D", "E", "F" };
-		StringBuffer out = new StringBuffer(in.length * 2);
-
-		while (i < in.length)
-		{
-			// First check to see if we need ASCII or HEX
-			if ((in[i] >= '0' && in[i] <= '9')
-					|| (in[i] >= 'a' && in[i] <= 'z')
-					|| (in[i] >= 'A' && in[i] <= 'Z') || in[i] == '$'
-					|| in[i] == '-' || in[i] == '_' || in[i] == '.'
-					|| in[i] == '+' || in[i] == '!')
-			{
-				out.append((char) in[i]);
-				i++;
-			}
-			else
-			{
-				out.append('%');
-				ch = (byte) (in[i] & 0xF0); // Strip off high nibble
-				ch = (byte) (ch >>> 4); // shift the bits down
-				ch = (byte) (ch & 0x0F); // must do this is high order bit is
-				// on!
-				out.append(pseudo[(int) ch]); // convert the nibble to a
-				// String Character
-				ch = (byte) (in[i] & 0x0F); // Strip off low nibble
-				out.append(pseudo[(int) ch]); // convert the nibble to a
-				// String Character
-				i++;
-			}
-		}
-
-		String rslt = new String(out);
-
-		return rslt;
-
-	}
-
-	/**
-	 * 
-	 * Convert a byte[] array to readable string format. This makes the "hex"
-	 * readable!
-	 * 
-	 * @author Jeff Boyle
-	 * 
-	 * @return result String buffer in String format
-	 * 
-	 * @param in
-	 *            byte[] buffer to convert to string format
-	 * 
-	 */
-	// Taken from http://www.devx.com/tips/Tip/13540
-	private static String byteArrayToByteString(byte in[])
-	{
-		byte ch = 0x00;
-		int i = 0;
-		if (in == null || in.length <= 0)
-			return null;
-
-		String pseudo[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-				"A", "B", "C", "D", "E", "F" };
-		StringBuffer out = new StringBuffer(in.length * 2);
-
-		while (i < in.length)
-		{
-			ch = (byte) (in[i] & 0xF0); // Strip off high nibble
-			ch = (byte) (ch >>> 4); // shift the bits down
-			ch = (byte) (ch & 0x0F); // must do this is high order bit is on!
-			out.append(pseudo[(int) ch]); // convert the nibble to a String
-			// Character
-			ch = (byte) (in[i] & 0x0F); // Strip off low nibble
-			out.append(pseudo[(int) ch]); // convert the nibble to a String
-			// Character
-			i++;
-		}
-
-		String rslt = new String(out);
-
-		return rslt;
-	}
-
-	private byte[] generateSHA1Hash(byte[] bytes)
-	{
-		try
-		{
-			byte[] hash = new byte[20];
-			MessageDigest sha = MessageDigest.getInstance("SHA-1");
-			hash = sha.digest(bytes);
-
-			return hash;
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			System.err
-					.println("Error: [TorrentFileHandler.java] \"SHA-1\" is not a valid algorithm name.");
-			System.exit(1);
-		}
-		return null;
-	}
 }
