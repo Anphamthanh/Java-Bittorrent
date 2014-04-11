@@ -36,7 +36,7 @@ public class Utils {
 	 * @return
 	 */
 	private HashMap<String, Integer> parsePeerList(String rawPeerList) {
-		HashMap<String, Integer> retHashMap = new HashMap<>();
+		HashMap<String, Integer> retHashMap = new HashMap<String, Integer>();
 		char[] charStream = rawPeerList.toCharArray();
 		int i = 0;
 
