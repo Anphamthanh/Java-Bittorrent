@@ -1,10 +1,13 @@
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 
@@ -23,6 +26,7 @@ public class BitTorrentClient {
 	private int interval = 0;
 	private int left = 0;
 	private HashMap<String, Integer> peerList;
+	private ArrayList<Peer> contactingPeers;
 	
 	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
@@ -61,10 +65,23 @@ public class BitTorrentClient {
 		byte[] byteStream = IOUtils.toByteArray(response);
 
 		TrackerResponse trackerResponse = Utils.handleTrackerResponse(byteStream);
-		Utils.dumpPeerList(trackerResponse.getPeerList());
+//		Utils.dumpPeerList(trackerResponse.getPeerList());
 		this.peerList = trackerResponse.getPeerList();
+		
+		this.contactingPeers.add(Utils.getOnePeer(this.peerList));
 		
 		return 0;
 	}
+	
+	public int contactPeers() throws MalformedURLException, IOException {
+		
+		for (Peer peer : this.contactingPeers) {
+			
+			System.out.println("Contacting IP " + peer.getIP() + " Port " + peer.getPort());
+		}
+		
+		return 0;
+	}
+	
 
 }

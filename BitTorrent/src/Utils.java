@@ -103,6 +103,22 @@ public class Utils {
 		}
 	}
 	
+	/**
+	 * Get one peer out of peer list to work with
+	 * @param peerList
+	 */
+	public static Peer getOnePeer(HashMap<String, Integer> peerList){
+		Set<String> keys = peerList.keySet();
+		
+		Peer peer = null;
+		
+		for(String itr: keys){
+			peer = new Peer(itr, peerList.get(itr));
+			break;
+		}
+		return peer;
+	}
+	
 	private static Pattern pattern;
 	private static Matcher matcher;
 
