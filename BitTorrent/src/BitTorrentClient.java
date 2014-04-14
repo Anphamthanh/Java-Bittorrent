@@ -105,14 +105,15 @@ public class BitTorrentClient {
 						new InputStreamReader(socket.getInputStream()));
 			
 
-			DataOutputStream os = new DataOutputStream(socket.getOutputStream());
-			os.writeByte(19);
-	        os.write("BitTorrent protocol".getBytes());
-	        os.write(new byte[8]);
-	        os.write(torrentFile.info_hash_as_binary);
-	        os.writeBytes(Utils.calculatePeerID(test_peer.getPort(), test_peer.getIP()));
+			DataOutputStream output_stream = new DataOutputStream(socket.getOutputStream());
+			output_stream.writeByte(19);
+			output_stream.write("BitTorrent protocol".getBytes());
+			output_stream.write(new byte[8]);
+			output_stream.write(torrentFile.info_hash_as_binary);
+			output_stream.writeBytes(this.PEER_ID);	        
+	        
 			String line = fromServer.readLine();
-			System.out.println("Client received: " + line + " from Server");
+			System.out.println("Client received: " + line + " from peer");
 			
 			
 			toServer.close();
