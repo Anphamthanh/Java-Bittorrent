@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -84,7 +85,7 @@ public class BitTorrentClient {
 		}
 		
 		for (Peer peer : this.contactingPeers) {	
-			System.out.println("Contacting IP " + peer.getIP() + " Port " + peer.getPort());
+			System.out.println("Having Peer at IP " + peer.getIP() + " Port " + peer.getPort());
 		}
 		
 		Peer test_peer = this.contactingPeers.get(0);
@@ -103,9 +104,17 @@ public class BitTorrentClient {
 				new BufferedReader(
 						new InputStreamReader(socket.getInputStream()));
 			
-			toServer.println("Hello from " + socket.getLocalSocketAddress()); 
+
+			DataOutputStream os = new DataOutputStream(socket.getOutputStream());
+			os.writeByte(19);
+	        os.write("BitTorrent protocol".getBytes());
+	        os.write(new byte[8]);
+	        os.write(torrentFile.info_hash_as_binary);
+	        os.writeBytes(Utils.calculatePeerID(test_peer.getPort(), test_peer.getIP()));
 			String line = fromServer.readLine();
 			System.out.println("Client received: " + line + " from Server");
+			
+			
 			toServer.close();
 			fromServer.close();
 			socket.close();
