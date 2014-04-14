@@ -1,5 +1,8 @@
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -68,18 +71,48 @@ public class BitTorrentClient {
 //		Utils.dumpPeerList(trackerResponse.getPeerList());
 		this.peerList = trackerResponse.getPeerList();
 		
-		this.contactingPeers.add(Utils.getOnePeer(this.peerList));
+		this.contactingPeers = Utils.getPeerArray(trackerResponse.getPeerList());
 		
 		return 0;
 	}
 	
 	public int contactPeers() throws MalformedURLException, IOException {
 		
-		for (Peer peer : this.contactingPeers) {
-			
+		if (this.contactingPeers == null) {
+			System.out.println("There is no peer to work with!");
+			return -1;
+		}
+		
+		for (Peer peer : this.contactingPeers) {	
 			System.out.println("Contacting IP " + peer.getIP() + " Port " + peer.getPort());
 		}
 		
+		Peer test_peer = this.contactingPeers.get(0);
+		
+		try {
+
+			System.out.println("Contacting IP " + test_peer.getIP() + " Port " + test_peer.getPort());
+
+			Socket socket = new Socket(test_peer.getIP(), test_peer.getPort()); 
+
+			System.out.println("Just connected to " + socket.getRemoteSocketAddress()); 
+			PrintWriter toServer = 
+				new PrintWriter(socket.getOutputStream(),true);
+			
+			BufferedReader fromServer = 
+				new BufferedReader(
+						new InputStreamReader(socket.getInputStream()));
+			
+			toServer.println("Hello from " + socket.getLocalSocketAddress()); 
+			String line = fromServer.readLine();
+			System.out.println("Client received: " + line + " from Server");
+			toServer.close();
+			fromServer.close();
+			socket.close();
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 		return 0;
 	}
 	

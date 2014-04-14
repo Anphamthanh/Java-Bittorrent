@@ -3,6 +3,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Set;
@@ -104,19 +105,19 @@ public class Utils {
 	}
 	
 	/**
-	 * Get one peer out of peer list to work with
+	 * Create an array of peer list
 	 * @param peerList
 	 */
-	public static Peer getOnePeer(HashMap<String, Integer> peerList){
+	public static ArrayList<Peer> getPeerArray(HashMap<String, Integer> peerList){
 		Set<String> keys = peerList.keySet();
 		
-		Peer peer = null;
+		ArrayList<Peer> peer_list = new ArrayList<Peer>();
 		
 		for(String itr: keys){
-			peer = new Peer(itr, peerList.get(itr));
-			break;
+			peer_list.add(new Peer(itr, peerList.get(itr)));
 		}
-		return peer;
+		
+		return peer_list;
 	}
 	
 	private static Pattern pattern;
