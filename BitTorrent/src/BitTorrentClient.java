@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -113,6 +114,7 @@ public class BitTorrentClient {
 			output_stream.writeBytes(this.PEER_ID);	        
 	        
 			String line = fromServer.readLine();
+			System.out.println(Handshake.parse(ByteBuffer.wrap(fromServer.readLine().getBytes("UTF-8"))));
 			System.out.println("Client received: " + line + " from peer");
 			
 			
