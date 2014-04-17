@@ -1,3 +1,4 @@
+import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -315,6 +316,21 @@ public class Utils {
 			System.exit(1);
 		}
 		return null;
+	}
+	
+	public static int send_handshake(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
+		try {
+			output_stream.writeByte(19);
+			output_stream.write("BitTorrent protocol".getBytes());
+			output_stream.write(new byte[8]);
+			output_stream.write(torrentFile.info_hash_as_binary);
+			output_stream.writeBytes(PEER_ID);	
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return -1;
+		} 
+		return 0;
 	}
 	
 }

@@ -89,7 +89,7 @@ public class BitTorrentClient {
 			System.out.println("Having Peer at IP " + peer.getIP() + " Port " + peer.getPort());
 		}
 		
-		Peer test_peer = this.contactingPeers.get(0);
+		Peer test_peer = this.contactingPeers.get(9);
 		
 		try {
 
@@ -107,14 +107,10 @@ public class BitTorrentClient {
 			
 
 			DataOutputStream output_stream = new DataOutputStream(socket.getOutputStream());
-			output_stream.writeByte(19);
-			output_stream.write("BitTorrent protocol".getBytes());
-			output_stream.write(new byte[8]);
-			output_stream.write(torrentFile.info_hash_as_binary);
-			output_stream.writeBytes(this.PEER_ID);	        
+			       
+	        Utils.send_handshake(output_stream, torrentFile, this.PEER_ID);
 	        
 			String line = fromServer.readLine();
-			System.out.println(Handshake.parse(ByteBuffer.wrap(fromServer.readLine().getBytes("UTF-8"))));
 			System.out.println("Client received: " + line + " from peer");
 			
 			
@@ -127,6 +123,5 @@ public class BitTorrentClient {
 		}
 		return 0;
 	}
-	
 
 }
