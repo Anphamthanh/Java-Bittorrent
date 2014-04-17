@@ -1,3 +1,4 @@
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -318,6 +319,10 @@ public class Utils {
 		return null;
 	}
 	
+	public static String get_response(DataInputStream input_stream) {
+		return "";
+	}
+	
 	public static int send_handshake(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
 		try {
 			output_stream.writeByte(19);
@@ -349,6 +354,19 @@ public class Utils {
 			output_stream.write(new byte[3]);
 			output_stream.writeByte(1);
 			output_stream.write(0);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return -1;
+		} 
+		return 0;
+	}
+	
+	public static int send_interested(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
+		try {
+			output_stream.write(new byte[3]);
+			output_stream.writeByte(1);
+			output_stream.write(2);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();

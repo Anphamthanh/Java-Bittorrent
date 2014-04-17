@@ -1,9 +1,11 @@
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -98,28 +100,34 @@ public class BitTorrentClient {
 			Socket socket = new Socket(test_peer.getIP(), test_peer.getPort()); 
 
 			System.out.println("Just connected to " + socket.getRemoteSocketAddress()); 
-			PrintWriter toServer = 
-				new PrintWriter(socket.getOutputStream(),true);
-			
-			BufferedReader fromServer = 
-				new BufferedReader(
-						new InputStreamReader(socket.getInputStream()));
+//			PrintWriter toServer = 
+//				new PrintWriter(socket.getOutputStream(),true);
+//			
+//			BufferedReader fromServer = 
+//				new BufferedReader(
+//						new InputStreamReader(socket.getInputStream()));
 			
 
 			DataOutputStream output_stream = new DataOutputStream(socket.getOutputStream());
+			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
 			       
 	        Utils.send_handshake(output_stream, torrentFile, this.PEER_ID);
 	        
-			String line = fromServer.readLine();
-			System.out.println("Client received: " + line + " from peer");
+	        StringWriter writer = new StringWriter();
+	        IOUtils.copy(input_stream, writer, "UTF-8");
+	        String response = writer.toString();
+	        
+//			String line = input_stream
+			System.out.println("Client received: " + response + " from peer");
 			
-			Utils.send_choke(output_stream, torrentFile, this.PEER_ID);
-//	        
-			line = fromServer.readLine();
-			System.out.println("Client received 2: " + line + " from peer");
 			
-			toServer.close();
-			fromServer.close();
+//			Utils.send_interested(output_stream, torrentFile, this.PEER_ID);
+////	        
+//			line = fromServer.readLine();
+//			System.out.println("Client received 2: " + line + " from peer");
+			
+//			toServer.close();
+//			fromServer.close();
 			socket.close();
 		}
 		catch(Exception ex) {
