@@ -113,6 +113,10 @@ public class BitTorrentClient {
 			String line = fromServer.readLine();
 			System.out.println("Client received: " + line + " from peer");
 			
+			Utils.send_choke(output_stream, torrentFile, this.PEER_ID);
+//	        
+			line = fromServer.readLine();
+			System.out.println("Client received 2: " + line + " from peer");
 			
 			toServer.close();
 			fromServer.close();
