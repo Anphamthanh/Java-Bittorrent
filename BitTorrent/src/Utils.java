@@ -1,3 +1,4 @@
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -322,32 +323,23 @@ public class Utils {
 		return null;
 	}
 	
-	public static String get_response_string(DataInputStream input_stream, String CHARSET) {
-		BufferedReader buffer = null;
-		StringBuilder result = new StringBuilder();
-		String temp;
+	public static byte[] get_response(DataInputStream input_stream, String CHARSET) {
+		int temp;
+		byte[] byte_array = new byte[1];
 		
 		try
 		{
-			buffer = new BufferedReader(new InputStreamReader(input_stream, CHARSET));
-
-		    while ((temp = buffer.readLine()) != null) {
-		        return temp;
-		    }
+			BufferedInputStream buffer = new BufferedInputStream(input_stream);
+			temp = buffer.read(byte_array);
 
 		} 
 		catch (Exception ignore) {	
 		}
-		finally {
-		    if (buffer != null) {
-		        try { buffer.close(); }
-		        catch (IOException ignored) {}
-		    }
-		}
-		return result.toString();
+		
+		return byte_array;
 	}
 	
-	public static String send_handshake(DataOutputStream output_stream, DataInputStream input_stream,
+	public static byte[] send_handshake(DataOutputStream output_stream, DataInputStream input_stream,
 			TorrentFile torrentFile, String PEER_ID, String CHARSET) {
 		try {
 			output_stream.writeByte(19);
@@ -358,9 +350,9 @@ public class Utils {
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
-			return "Error\n";
+			return null;
 		} 
-		return get_response_string(input_stream, CHARSET);
+		return get_response(input_stream, CHARSET);
 	}
 	
 	public static int send_keepalive(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
@@ -387,7 +379,8 @@ public class Utils {
 		return 0;
 	}
 	
-	public static int send_interested(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
+	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream,
+			TorrentFile torrentFile, String PEER_ID, String CHARSET) {
 		try {
 			output_stream.write(new byte[3]);
 			output_stream.writeByte(1);
@@ -395,9 +388,9 @@ public class Utils {
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
-			return -1;
+			return null;
 		} 
-		return 0;
+		return get_response(input_stream, CHARSET);
 	}
 	
 }

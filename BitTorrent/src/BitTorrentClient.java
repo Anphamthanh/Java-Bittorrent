@@ -104,11 +104,12 @@ public class BitTorrentClient {
 
 			DataOutputStream output_stream = new DataOutputStream(socket.getOutputStream());
 			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
-			String response = "";  
-	        
+			byte[] response = null; 	        
 	        
 	        response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID, this.CHARSET);
-
+			System.out.println("Client received: " + response + " from peer");
+			
+			response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID, this.CHARSET);
 			System.out.println("Client received: " + response + " from peer");
 			
 			output_stream.close();
