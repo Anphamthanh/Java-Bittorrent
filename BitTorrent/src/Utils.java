@@ -324,13 +324,13 @@ public class Utils {
 	}
 	
 	public static byte[] get_response(DataInputStream input_stream, String CHARSET) {
-		int temp;
+
 		byte[] byte_array = new byte[1];
 		
 		try
 		{
 			BufferedInputStream buffer = new BufferedInputStream(input_stream);
-			temp = buffer.read(byte_array);
+			buffer.read(byte_array);
 
 		} 
 		catch (Exception ignore) {	
