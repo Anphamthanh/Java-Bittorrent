@@ -1,5 +1,8 @@
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -319,11 +322,33 @@ public class Utils {
 		return null;
 	}
 	
-	public static String get_response(DataInputStream input_stream) {
-		return "";
+	public static String get_response_string(DataInputStream input_stream, String CHARSET) {
+		BufferedReader buffer = null;
+		StringBuilder result = new StringBuilder();
+		String temp;
+		
+		try
+		{
+			buffer = new BufferedReader(new InputStreamReader(input_stream, CHARSET));
+
+		    while ((temp = buffer.readLine()) != null) {
+		        return temp;
+		    }
+
+		} 
+		catch (Exception ignore) {	
+		}
+		finally {
+		    if (buffer != null) {
+		        try { buffer.close(); }
+		        catch (IOException ignored) {}
+		    }
+		}
+		return result.toString();
 	}
 	
-	public static int send_handshake(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
+	public static String send_handshake(DataOutputStream output_stream, DataInputStream input_stream,
+			TorrentFile torrentFile, String PEER_ID, String CHARSET) {
 		try {
 			output_stream.writeByte(19);
 			output_stream.write("BitTorrent protocol".getBytes());
@@ -333,9 +358,9 @@ public class Utils {
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
-			return -1;
+			return "Error\n";
 		} 
-		return 0;
+		return get_response_string(input_stream, CHARSET);
 	}
 	
 	public static int send_keepalive(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {

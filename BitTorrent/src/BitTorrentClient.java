@@ -73,7 +73,7 @@ public class BitTorrentClient {
 		byte[] byteStream = IOUtils.toByteArray(response);
 
 		TrackerResponse trackerResponse = Utils.handleTrackerResponse(byteStream);
-//		Utils.dumpPeerList(trackerResponse.getPeerList());
+
 		this.peerList = trackerResponse.getPeerList();
 		
 		this.contactingPeers = Utils.getPeerArray(trackerResponse.getPeerList());
@@ -101,34 +101,18 @@ public class BitTorrentClient {
 			Socket socket = new Socket(test_peer.getIP(), test_peer.getPort()); 
 
 			System.out.println("Just connected to " + socket.getRemoteSocketAddress()); 
-//			PrintWriter toServer = 
-//				new PrintWriter(socket.getOutputStream(),true);
-//			
-//			BufferedReader fromServer = 
-//				new BufferedReader(
-//						new InputStreamReader(socket.getInputStream()));
-			
 
 			DataOutputStream output_stream = new DataOutputStream(socket.getOutputStream());
 			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
-			       
-	        Utils.send_handshake(output_stream, torrentFile, this.PEER_ID);
+			String response = "";  
 	        
-	        StringWriter writer = new StringWriter();
-	        IOUtils.copy(input_stream, writer, this.CHARSET);
-	        String response = writer.toString();
 	        
-//			String line = input_stream
+	        response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID, this.CHARSET);
+
 			System.out.println("Client received: " + response + " from peer");
 			
-			
-//			Utils.send_interested(output_stream, torrentFile, this.PEER_ID);
-////	        
-//			line = fromServer.readLine();
-//			System.out.println("Client received 2: " + line + " from peer");
-			
-//			toServer.close();
-//			fromServer.close();
+			output_stream.close();
+			input_stream.close();
 			socket.close();
 		}
 		catch(Exception ex) {
