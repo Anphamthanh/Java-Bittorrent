@@ -24,6 +24,7 @@ public class BitTorrentClient {
 	private int PORT_NUMBER;
 	private String IP;
 	private String PEER_ID;
+	private String CHARSET = "UTF-8";
 	
 	private TorrentFileHandler torrentFileHandler;
 	private TorrentFile torrentFile;
@@ -53,7 +54,7 @@ public class BitTorrentClient {
 	
 	public int contactTracker() throws MalformedURLException, IOException{
 		
-		String charset = "UTF-8";
+		String charset = this.CHARSET;
 		String tracker_url = torrentFile.tracker_url;
 		String info_hash = torrentFile.info_hash_as_url;
 		
@@ -114,7 +115,7 @@ public class BitTorrentClient {
 	        Utils.send_handshake(output_stream, torrentFile, this.PEER_ID);
 	        
 	        StringWriter writer = new StringWriter();
-	        IOUtils.copy(input_stream, writer, "UTF-8");
+	        IOUtils.copy(input_stream, writer, this.CHARSET);
 	        String response = writer.toString();
 	        
 //			String line = input_stream
