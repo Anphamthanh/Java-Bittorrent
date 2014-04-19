@@ -1,21 +1,14 @@
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
-
 import org.apache.commons.io.IOUtils;
 
 
@@ -106,13 +99,13 @@ public class BitTorrentClient {
 			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
 			byte[] response = null; 	        
 	        
-	        response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID, this.CHARSET);
+	        response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
 			System.out.println("Client received: " + response + " from peer");
 			
-			response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID, this.CHARSET);
+			response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID);
 			System.out.println("Client received: " + response + " from peer");
 			
-			response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID, this.CHARSET);
+			response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID);
 			System.out.println("Client received: " + response + " from peer");
 			
 			output_stream.close();

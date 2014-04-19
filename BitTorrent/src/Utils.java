@@ -1,9 +1,6 @@
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -323,7 +320,7 @@ public class Utils {
 		return null;
 	}
 	
-	public static byte[] get_response(DataInputStream input_stream, String CHARSET) {
+	public static byte[] get_response(DataInputStream input_stream) {
 
 		byte[] byte_array = new byte[1];
 		
@@ -340,7 +337,7 @@ public class Utils {
 	}
 	
 	public static byte[] send_handshake(DataOutputStream output_stream, DataInputStream input_stream,
-			TorrentFile torrentFile, String PEER_ID, String CHARSET) {
+			TorrentFile torrentFile, String PEER_ID) {
 		try {
 			output_stream.writeByte(19);
 			output_stream.write("BitTorrent protocol".getBytes());
@@ -352,7 +349,7 @@ public class Utils {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_response(input_stream, CHARSET);
+		return get_response(input_stream);
 	}
 	
 	public static int send_keepalive(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
@@ -380,7 +377,7 @@ public class Utils {
 	}
 	
 	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream,
-			TorrentFile torrentFile, String PEER_ID, String CHARSET) {
+			TorrentFile torrentFile, String PEER_ID) {
 		try {
 			output_stream.write(new byte[3]);
 			output_stream.writeByte(1);
@@ -390,7 +387,23 @@ public class Utils {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_response(input_stream, CHARSET);
+		return get_response(input_stream);
+	}
+	
+	public static byte[] send_request(DataOutputStream output_stream, DataInputStream input_stream,
+			int piece_index, String PEER_ID) {
+		try {
+			output_stream.write(new byte[2]);
+			output_stream.writeByte(1);
+			output_stream.writeByte(3);
+			output_stream.write(6);
+			output_stream.write(piece_index);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return null;
+		} 
+		return get_response(input_stream);
 	}
 	
 }
