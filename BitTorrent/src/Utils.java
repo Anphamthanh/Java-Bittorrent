@@ -1,6 +1,8 @@
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -364,17 +366,29 @@ public class Utils {
 		return 0;
 	}
 	
-	public static int send_choke(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
+	public static void send_test(DataOutputStream output_stream) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
+
 		try {
-			output_stream.write(new byte[3]);
-			output_stream.writeByte(1);
-			output_stream.write(0);
+			
+			w.writeInt(1);
+			w.writeByte(1);
+			w.flush();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		byte[] unchoke = baos.toByteArray();
+		
+		try {
+			output_stream.write(unchoke);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
-			return -1;
 		} 
-		return 0;
 	}
 	
 	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
