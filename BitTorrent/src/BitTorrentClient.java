@@ -18,6 +18,7 @@ public class BitTorrentClient {
 	private String IP;
 	private String PEER_ID;
 	private String CHARSET = "UTF-8";
+	private int BLOCK_LENGTH = 1<<14;
 	
 	private TorrentFileHandler torrentFileHandler;
 	private TorrentFile torrentFile;
@@ -28,6 +29,8 @@ public class BitTorrentClient {
 	private int left = 0;
 	private HashMap<String, Integer> peerList;
 	private ArrayList<Peer> contactingPeers;
+	private int current_piece_index = 0;
+	private int current_block_offset = 0;
 	
 	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
@@ -85,7 +88,7 @@ public class BitTorrentClient {
 			System.out.println("Having Peer at IP " + peer.getIP() + " Port " + peer.getPort());
 		}
 		
-		Peer test_peer = this.contactingPeers.get(9);
+		Peer test_peer = this.contactingPeers.get(0);
 		
 		try {
 
@@ -102,10 +105,12 @@ public class BitTorrentClient {
 	        response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
 			System.out.println("Client received: " + response + " from peer");
 			
-			response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID);
-			System.out.println("Client received: " + response + " from peer");
+			do {
+				response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID);
+				System.out.println("Client received: " + response + " from peer");
+			} while (false);
 			
-			response = Utils.send_interested(output_stream, input_stream, torrentFile, this.PEER_ID);
+			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
 			System.out.println("Client received: " + response + " from peer");
 			
 			output_stream.close();

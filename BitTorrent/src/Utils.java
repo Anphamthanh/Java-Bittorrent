@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -391,13 +392,22 @@ public class Utils {
 	}
 	
 	public static byte[] send_request(DataOutputStream output_stream, DataInputStream input_stream,
-			int piece_index, String PEER_ID) {
+			int piece_index, int byte_offset, int block_length_in_bytes) {
 		try {
 			output_stream.write(new byte[2]);
 			output_stream.writeByte(1);
 			output_stream.writeByte(3);
-			output_stream.write(6);
-			output_stream.write(piece_index);
+			
+			output_stream.writeByte(6);
+			
+			byte[] byte_index = ByteBuffer.allocate(4).putInt(piece_index).array();			
+			output_stream.write(byte_index);
+			
+			byte[] block_offset = ByteBuffer.allocate(4).putInt(byte_offset).array();			
+			output_stream.write(block_offset);			
+			
+			byte[] block_length = ByteBuffer.allocate(4).putInt(block_length_in_bytes).array();			
+			output_stream.write(block_length);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
