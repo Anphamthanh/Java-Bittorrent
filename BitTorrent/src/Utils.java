@@ -377,8 +377,7 @@ public class Utils {
 		return 0;
 	}
 	
-	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream,
-			TorrentFile torrentFile, String PEER_ID) {
+	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
 		try {
 			output_stream.write(new byte[3]);
 			output_stream.writeByte(1);
@@ -394,9 +393,8 @@ public class Utils {
 	public static byte[] send_request(DataOutputStream output_stream, DataInputStream input_stream,
 			int piece_index, int byte_offset, int block_length_in_bytes) {
 		try {
-			output_stream.write(new byte[2]);
-			output_stream.writeByte(1);
-			output_stream.writeByte(3);
+			output_stream.write(new byte[3]);
+			output_stream.writeByte(13);
 			
 			output_stream.writeByte(6);
 			
