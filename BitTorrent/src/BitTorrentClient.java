@@ -102,19 +102,17 @@ public class BitTorrentClient {
 			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
 			byte[] response = null; 	        
 	        
-	        response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
-			System.out.println("Client received: " + response + " from peer");
+//			do {
+				response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
+				System.out.println("Client received: " + Message.is_handshake(response, torrentFile, this.PEER_ID) + " from peer");
+//			} while (!Message.is_handshake(response, torrentFile, this.PEER_ID));
 			
-			do {
-				response = Utils.send_interested(output_stream, input_stream);
-				System.out.println("Client received: " + response + " from peer");
-				System.out.println(Message.is_unchoke(response));
-				try {
-				    Thread.sleep(1000);
-				} catch(InterruptedException ex) {
-				    Thread.currentThread().interrupt();
-				}
-			} while (!Message.is_unchoke(response));
+			
+//			do {
+			response = Utils.send_interested(output_stream, input_stream);
+			System.out.println("Client received: " + response + " from peer");
+			System.out.println(Message.is_unchoke(response));
+//			} while (!Message.is_unchoke(response));
 			
 			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
 			System.out.println("Client received: " + response + " from peer");
@@ -128,5 +126,6 @@ public class BitTorrentClient {
 		}
 		return 0;
 	}
+	
 
 }

@@ -322,6 +322,15 @@ public class Utils {
 		return null;
 	}
 	
+
+	public static void sleep(int timer) {
+		try {
+		    Thread.sleep(timer);
+		} catch(InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		}
+	}
+	
 	public static byte[] get_response(DataInputStream input_stream) {
 
 		byte[] byte_array = new byte[1];
@@ -363,7 +372,7 @@ public class Utils {
 		return 0;
 	}
 	
-	public static void send_test(DataOutputStream output_stream) {
+	public static void send_unchoke(DataOutputStream output_stream) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream w = new DataOutputStream(baos);
 
