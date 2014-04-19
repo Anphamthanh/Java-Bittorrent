@@ -110,7 +110,7 @@ public class BitTorrentClient {
 				System.out.println("Client received: " + response + " from peer");
 				System.out.println(Message.is_unchoke(response));
 				try {
-				    Thread.sleep(500);
+				    Thread.sleep(1000);
 				} catch(InterruptedException ex) {
 				    Thread.currentThread().interrupt();
 				}

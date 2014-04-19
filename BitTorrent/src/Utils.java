@@ -1,4 +1,3 @@
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -329,9 +328,7 @@ public class Utils {
 		
 		try
 		{
-			BufferedInputStream buffer = new BufferedInputStream(input_stream);
-			buffer.read(byte_array);
-
+			input_stream.readFully(byte_array);
 		} 
 		catch (Exception ignore) {	
 		}
