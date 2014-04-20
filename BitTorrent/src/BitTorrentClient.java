@@ -109,11 +109,11 @@ public class BitTorrentClient {
 			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
 			byte[] response = null; 	        
 	        
-//			do {
+			do {
+				Utils.sleep(500);
 				response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
-
-				System.out.println("Client received: " + response + " from peer");
-//			} while (!Message.is_handshake(response, torrentFile, this.PEER_ID));
+				System.out.println("Client received: " + MessageHandler.is_handshake(response, torrentFile, PEER_ID) + " from peer");
+			} while (!MessageHandler.is_handshake(response, torrentFile, this.PEER_ID));
 			
 			
 ////			do {
