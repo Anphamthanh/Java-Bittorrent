@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.apache.commons.io.IOUtils;
 
 
@@ -19,6 +20,8 @@ public class BitTorrentClient {
 	private String PEER_ID;
 	private String CHARSET = "UTF-8";
 	private int BLOCK_LENGTH = 1<<14;
+	private int TOTAL_PIECE = 0;
+	private int PIECE_SIZE = 0;
 	
 	private TorrentFileHandler torrentFileHandler;
 	private TorrentFile torrentFile;
@@ -46,6 +49,8 @@ public class BitTorrentClient {
 		}
 		
 		left = torrentFile.file_length - downloaded;
+		TOTAL_PIECE = torrentFile.piece_hash_values_as_hex.size();
+		PIECE_SIZE = torrentFile.piece_length;
 	}
 	
 	public int contactTracker() throws MalformedURLException, IOException{
@@ -73,6 +78,8 @@ public class BitTorrentClient {
 		this.peerList = trackerResponse.getPeerList();
 		
 		this.contactingPeers = Utils.getPeerArray(trackerResponse.getPeerList());
+		
+		
 		
 		return 0;
 	}
@@ -104,18 +111,19 @@ public class BitTorrentClient {
 	        
 //			do {
 				response = Utils.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
-				System.out.println("Client received: " + Message.is_handshake(response, torrentFile, this.PEER_ID) + " from peer");
+
+				System.out.println("Client received: " + response + " from peer");
 //			} while (!Message.is_handshake(response, torrentFile, this.PEER_ID));
 			
 			
-//			do {
-			response = Utils.send_interested(output_stream, input_stream);
-			System.out.println("Client received: " + response + " from peer");
-			System.out.println(Message.is_unchoke(response));
-//			} while (!Message.is_unchoke(response));
-			
-			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
-			System.out.println("Client received: " + response + " from peer");
+////			do {
+//			response = Utils.send_interested(output_stream, input_stream);
+//			System.out.println("Client received: " + response + " from peer");
+//			System.out.println(MessageHandler.is_unchoke(response));
+////			} while (!Message.is_unchoke(response));
+//			
+//			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
+//			System.out.println("Client received: " + response + " from peer");
 			
 			output_stream.close();
 			input_stream.close();

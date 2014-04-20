@@ -1,23 +1,92 @@
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MessageHandler {
 	
-	public static boolean is_unchoked(byte[] msg) {
-		
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+	public static boolean is_unchoke(byte[] msg) {		
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
+
 		try {
-			outputStream.write(new byte[3]);
-			outputStream.write(1);
-			outputStream.write(1);
+
+			w.writeInt(1);
+			w.writeByte(1);
+			w.flush();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
+
+		byte[] unchoke = baos.toByteArray();
+
+		return Arrays.equals(msg, unchoke);
+	}
+
+	public static boolean is_handshake(byte[] msg, TorrentFile torrentFile, String PEER_ID) {		
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
+
+		try {
+
+			w.writeByte(19);
+			w.write("BitTorrent protocol".getBytes());
+			w.write(new byte[8]);
+			w.write(torrentFile.info_hash_as_binary);
+			w.writeBytes(PEER_ID);
+			w.flush();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+		byte[] handshake = baos.toByteArray();
+
+		return Arrays.equals(msg, handshake);
+	}
+	
+	public static Message process_input_stream(byte[] input) {
 		
-		byte[] unchoked = outputStream.toByteArray();
+		int parser_index = 0;
 		
-		return Arrays.equals(unchoked, msg);
+		byte[] msg_length_byte = new byte[4];
+		System.arraycopy(input, parser_index, msg_length_byte, 0, 4);
+		ByteBuffer wrapped = ByteBuffer.wrap(msg_length_byte);
+		int msg_length = wrapped.getInt();
+		parser_index += 4;
+
+		byte[] msg = new byte[msg_length];
+		System.arraycopy(input, parser_index, msg, 0, msg_length);
+		return new Message(msg_length, msg);
+		
+//		while (parser_index < input.length) {
+//			try {
+//				byte[] msg_length_byte = new byte[4];
+//				System.arraycopy(input, parser_index, msg_length_byte, 0, 4);
+//				ByteBuffer wrapped = ByteBuffer.wrap(msg_length_byte);
+//				int msg_length = wrapped.getInt();
+//				parser_index += 4;
+//
+//				byte[] msg = new byte[msg_length];
+//				System.arraycopy(input, parser_index, msg, 0, msg_length);
+//				result.add(new Message(msg_length, msg));
+//
+//				parser_index += msg_length;
+//			}
+//			catch (Exception ignore) {
+//				break;
+//			}
+//		}
+		
+//		return result;
 	}
 }

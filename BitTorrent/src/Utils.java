@@ -331,9 +331,9 @@ public class Utils {
 		}
 	}
 	
-	public static byte[] get_response(DataInputStream input_stream) {
+	public static byte[] get_response(DataInputStream input_stream, int expected_length) {
 
-		byte[] byte_array = new byte[1];
+		byte[] byte_array = new byte[expected_length];
 		
 		try
 		{
@@ -358,7 +358,7 @@ public class Utils {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_response(input_stream);
+		return get_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
 	
 	public static int send_keepalive(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
@@ -407,7 +407,7 @@ public class Utils {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_response(input_stream);
+		return null;
 	}
 	
 	public static byte[] send_request(DataOutputStream output_stream, DataInputStream input_stream,
@@ -431,7 +431,7 @@ public class Utils {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_response(input_stream);
+		return null;
 	}
 	
 }
