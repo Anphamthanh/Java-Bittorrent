@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class MessageHandler {
 	
 
-	public static byte[] get_response(DataInputStream input_stream) {
+	public static Message get_response(DataInputStream input_stream) {
 
 		byte[] msg_length = new byte[4];
 		try
@@ -18,9 +18,19 @@ public class MessageHandler {
 		catch (Exception ignore) {	
 		}
 		
-
-		ByteBuffer wrapped = ByteBuffer.wrap(msg_length);
-		int length = wrapped.getInt();
+		ByteBuffer length_wrapped = ByteBuffer.wrap(msg_length);
+		int length = length_wrapped.getInt();
+		
+		byte[] msg_id = new byte[1];
+		try
+		{
+			input_stream.readFully(msg_id);
+		} 
+		catch (Exception ignore) {	
+		}
+		
+		ByteBuffer id_wrapped = ByteBuffer.wrap(msg_id);
+		byte id = id_wrapped.get(0);
 		
 		byte[] byte_array = new byte[length];
 		
@@ -31,7 +41,7 @@ public class MessageHandler {
 		catch (Exception ignore) {	
 		}
 		
-		return byte_array;
+		return new Message(length, id, byte_array);
 	}
 	
 	public static byte[] get_fixed_length_response(DataInputStream input_stream, int expected_length) {
@@ -75,7 +85,7 @@ public class MessageHandler {
 		return 0;
 	}
 	
-	public static byte[] send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
+	public static Message send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
 		try {
 			output_stream.writeInt(1);
 			output_stream.writeByte(1);
@@ -87,7 +97,7 @@ public class MessageHandler {
 		return get_response(input_stream); 
 	}
 	
-	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
+	public static Message send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
 		try {
 			output_stream.write(new byte[3]);
 			output_stream.writeByte(1);
@@ -124,29 +134,13 @@ public class MessageHandler {
 		return null;
 	}
 	
-	public static boolean is_unchoke(byte[] msg) {		
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream w = new DataOutputStream(baos);
-
-		try {
-
-			w.writeInt(1);
-			w.writeByte(1);
-			w.flush();
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-
-		byte[] unchoke = baos.toByteArray();
-		
-		//TODO fix this, the unchoke message is mixed up with other message in TCP packets, so this always return false;
-		if (Arrays.equals(msg, unchoke)) {
+	public static boolean is_unchoke(Message msg) {		
+	
+		byte unchoke_id = 1;
+		if (msg.id == unchoke_id) {
 			return true;
 		}
+		
 		return is_bitfield(msg);
 	}
 
@@ -164,7 +158,7 @@ public class MessageHandler {
 			w.writeByte(19);
 			w.write("BitTorrent protocol".getBytes());
 //			w.write(new byte[8]);
-//			w.write(torrentFile.info_hash_as_binary);
+//			w.write(torrentFile.info_hash_as_binary);//TODO need to verify hash before accepting connection
 			w.flush();
 
 		} catch (IOException e) {
@@ -178,40 +172,10 @@ public class MessageHandler {
 		return Arrays.equals(protocol, handshake);
 	}
 	
-	public static boolean is_bitfield(byte[] msg) {		
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream w = new DataOutputStream(baos);;
-		byte[] protocol_id = new byte[1];
-		System.arraycopy(msg, 4, protocol_id, 0, 1);
-
-		try {
-
-			w.writeByte(5);
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-
-		byte[] handshake = baos.toByteArray();
-
-		return Arrays.equals(protocol_id, handshake);
-	}
-	
-	public static Message process_input_stream(byte[] input) {
+	public static boolean is_bitfield(Message msg) {		
 		
-		int parser_index = 0;
+		byte bitfield_id = 5;
 		
-		byte[] msg_length_byte = new byte[4];
-		System.arraycopy(input, parser_index, msg_length_byte, 0, 4);
-		ByteBuffer wrapped = ByteBuffer.wrap(msg_length_byte);
-		int msg_length = wrapped.getInt();
-		parser_index += 4;
-
-		byte[] msg = new byte[msg_length];
-		System.arraycopy(input, parser_index, msg, 0, msg_length);
-		return null;
+		return msg.id == bitfield_id;
 	}
 }

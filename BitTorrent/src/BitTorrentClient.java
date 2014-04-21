@@ -118,10 +118,12 @@ public class BitTorrentClient {
 				Utils.sleep(2000);
 			}
 			
+			Message message;
+			
 			while(true) {
-				response = MessageHandler.send_interested(output_stream, input_stream);
-				System.out.println("Client received: " + Utils.byteArrayToByteString(response) + " from peer");
-				if (MessageHandler.is_unchoke(response)) {
+				message = MessageHandler.send_interested(output_stream, input_stream);
+				System.out.println("Client received: " + message + " from peer");
+				if (MessageHandler.is_unchoke(message)) {
 					break;
 				}
 				Utils.sleep(2000);
