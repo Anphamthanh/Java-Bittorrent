@@ -119,18 +119,22 @@ public class MessageHandler {
 	public static Message send_request(DataOutputStream output_stream, DataInputStream input_stream,
 			int piece_index, int byte_offset, int block_length_in_bytes) {
 		try {
-			output_stream.writeInt(13);
-			
+			output_stream.writeInt(13);			
 			output_stream.writeByte(6);
+			output_stream.writeInt(piece_index);
+			output_stream.writeInt(byte_offset);
+			output_stream.writeInt(block_length_in_bytes);
 			
-			byte[] byte_index = ByteBuffer.allocate(4).putInt(piece_index).array();			
-			output_stream.write(byte_index);
 			
-			byte[] block_offset = ByteBuffer.allocate(4).putInt(byte_offset).array();			
-			output_stream.write(block_offset);			
+//			byte[] byte_index = ByteBuffer.allocate(4).putInt(piece_index).array();			
+//			output_stream.write(byte_index);
+//			
+//			byte[] block_offset = ByteBuffer.allocate(4).putInt(byte_offset).array();			
+//			output_stream.write(block_offset);			
+//			
+//			byte[] block_length = ByteBuffer.allocate(4).putInt(block_length_in_bytes).array();			
+//			output_stream.write(block_length);
 			
-			byte[] block_length = ByteBuffer.allocate(4).putInt(block_length_in_bytes).array();			
-			output_stream.write(block_length);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();

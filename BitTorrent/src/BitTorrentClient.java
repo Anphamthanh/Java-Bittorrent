@@ -40,6 +40,7 @@ public class BitTorrentClient {
 	private boolean finished = false;
 	
 	
+	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
 		IP = Utils.getIP();
 		this.PORT_NUMBER = port;
