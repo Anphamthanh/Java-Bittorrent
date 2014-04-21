@@ -34,7 +34,7 @@ public class MessageHandler {
 		return byte_array;
 	}
 	
-	public static byte[] get_handshake_response(DataInputStream input_stream, int expected_length) {
+	public static byte[] get_fixed_length_response(DataInputStream input_stream, int expected_length) {
 		
 		byte[] byte_array = new byte[expected_length];
 		
@@ -61,7 +61,7 @@ public class MessageHandler {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_handshake_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
+		return get_fixed_length_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
 	
 	public static int send_keepalive(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
@@ -212,6 +212,6 @@ public class MessageHandler {
 
 		byte[] msg = new byte[msg_length];
 		System.arraycopy(input, parser_index, msg, 0, msg_length);
-		return new Message(msg_length, msg);
+		return null;
 	}
 }
