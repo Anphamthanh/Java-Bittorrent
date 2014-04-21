@@ -157,11 +157,8 @@ public class MessageHandler {
 	public static boolean is_unchoke(Message msg) {		
 	
 		byte unchoke_id = 1;
-		if (msg.id == unchoke_id) {
-			return true;
-		}
 		
-		return is_bitfield(msg);
+		return msg.id == unchoke_id;
 	}
 
 	public static boolean is_handshake(byte[] msg, TorrentFile torrentFile, String PEER_ID) {		
