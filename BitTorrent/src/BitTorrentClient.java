@@ -31,9 +31,13 @@ public class BitTorrentClient {
 	private int interval = 0;
 	private int left = 0;
 	private HashMap<String, Integer> peerList;
-	private ArrayList<Peer> contactingPeers;
+	private ArrayList<Peer> peer_pool;
 	private int current_piece_index = 0;
 	private int current_block_offset = 0;
+	private byte[] current_bitfield;
+	private int current_peer_index = 0;
+	private Peer current_peer;
+	private boolean finished = false;
 	
 	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
@@ -77,7 +81,7 @@ public class BitTorrentClient {
 
 		this.peerList = trackerResponse.getPeerList();
 		
-		this.contactingPeers = Utils.getPeerArray(trackerResponse.getPeerList());
+		this.peer_pool = Utils.getPeerArray(trackerResponse.getPeerList());
 		
 		
 		
@@ -86,60 +90,65 @@ public class BitTorrentClient {
 	
 	public int contactPeers() throws MalformedURLException, IOException {
 		
-		if (this.contactingPeers == null) {
+		if (this.peer_pool == null) {
 			System.out.println("There is no peer to work with!");
 			return -1;
 		}
 		
-		for (Peer peer : this.contactingPeers) {	
-			System.out.println("Having Peer at IP " + peer.getIP() + " Port " + peer.getPort());
-		}
-		
-		Peer test_peer = this.contactingPeers.get(1);
-		
-		try {
+		while(!finished) {
 
-			System.out.println("Contacting IP " + test_peer.getIP() + " Port " + test_peer.getPort());
+			Peer test_peer = this.peer_pool.get(current_peer_index);
 
-			Socket socket = new Socket(test_peer.getIP(), test_peer.getPort()); 
+			try {
 
-			System.out.println("Just connected to " + socket.getRemoteSocketAddress()); 
+				System.out.println("Contacting IP " + test_peer.getIP() + " Port " + test_peer.getPort());
 
-			DataOutputStream output_stream = new DataOutputStream(socket.getOutputStream());
-			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
-			byte[] response = null; 	        
-	        
-			while(true) {
-				response = MessageHandler.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
-				System.out.println("Client received: " + Utils.byteArrayToByteString(response)+ " from peer");
-				if (MessageHandler.is_handshake(response, torrentFile, PEER_ID)) {
-					break;
+				Socket socket = new Socket(test_peer.getIP(), test_peer.getPort()); 
+
+				System.out.println("Just connected to " + socket.getRemoteSocketAddress()); 
+
+				DataOutputStream output_stream = new DataOutputStream(socket.getOutputStream());
+				DataInputStream input_stream = new DataInputStream(socket.getInputStream());
+				byte[] response = null; 	        
+
+				while(true) {
+					response = MessageHandler.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
+					System.out.println("Client received: " + Utils.byteArrayToByteString(response)+ " from peer");
+					if (MessageHandler.is_handshake(response, torrentFile, PEER_ID)) {
+						break;
+					}
+					Utils.sleep(2000);
 				}
-				Utils.sleep(2000);
-			}
-			
-			Message message;
-			
-			while(true) {
-				message = MessageHandler.send_interested(output_stream, input_stream);
-				System.out.println("Client received: " + message + " from peer");
-				if (MessageHandler.is_unchoke(message)) {
-					break;
+
+				Message message;
+
+				while(true) {
+					message = MessageHandler.send_interested(output_stream, input_stream);
+					System.out.println("Client received: \n" + message + " from peer");
+					if (MessageHandler.is_unchoke(message)) {
+						break;
+					}
+					Utils.sleep(2000);
 				}
-				Utils.sleep(2000);
+
+				if (MessageHandler.is_bitfield(message)) {
+					if (!MessageHandler.is_piece_available(message.content, current_piece_index)) {
+						current_peer_index++;
+						continue;
+					}
+				}
+				//			
+				//			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
+				//			System.out.println("Client received: " + response + " from peer");
+
+				finished = true;
+				output_stream.close();
+				input_stream.close();
+				socket.close();
 			}
-			
-			
-//			
-//			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
-//			System.out.println("Client received: " + response + " from peer");
-			
-			output_stream.close();
-			input_stream.close();
-			socket.close();
-		}
-		catch(Exception ex) {
-			ex.printStackTrace();
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 		return 0;
 	}

@@ -7,7 +7,13 @@ import java.util.Arrays;
 
 public class MessageHandler {
 	
-
+	public static boolean is_piece_available(byte[] bitfield, int piece_index) {
+		int byte_index = piece_index/8;
+		byte data = bitfield[byte_index];
+		int mask = 1<<(7 - (piece_index % 8));
+		
+		return ((data & mask) != 0);
+	}
 	public static Message get_response(DataInputStream input_stream) {
 
 		byte[] msg_length = new byte[4];
