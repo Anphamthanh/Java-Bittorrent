@@ -80,16 +80,6 @@ public class MessageHandler {
 		return get_fixed_length_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
 	
-	public static int send_keepalive(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
-		try {
-			output_stream.write(new byte[4]);
-		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-			return -1;
-		} 
-		return 0;
-	}
 	
 	public static Message send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
 		try {
@@ -118,29 +108,37 @@ public class MessageHandler {
 	
 	public static Message send_request(DataOutputStream output_stream, DataInputStream input_stream,
 			int piece_index, int byte_offset, int block_length_in_bytes) {
+		
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
+
 		try {
-			output_stream.writeInt(13);			
-			output_stream.writeByte(6);
-			output_stream.writeInt(piece_index);
-			output_stream.writeInt(byte_offset);
-			output_stream.writeInt(block_length_in_bytes);
-			
-			
-//			byte[] byte_index = ByteBuffer.allocate(4).putInt(piece_index).array();			
-//			output_stream.write(byte_index);
-//			
-//			byte[] block_offset = ByteBuffer.allocate(4).putInt(byte_offset).array();			
-//			output_stream.write(block_offset);			
-//			
-//			byte[] block_length = ByteBuffer.allocate(4).putInt(block_length_in_bytes).array();			
-//			output_stream.write(block_length);
-			
+			w.writeInt(13);
+			w.writeByte(6);
+			w.writeInt(piece_index);
+			w.writeInt(byte_offset);
+			w.writeInt(block_length_in_bytes);
+			w.flush();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		byte[] request = baos.toByteArray();
+		
+		try {
+			output_stream.write(request);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_response(input_stream);
+		
+		Message response = get_response(input_stream);
+		
+		return response;
 	}
 	
 	public static boolean is_unchoke(Message msg) {		
