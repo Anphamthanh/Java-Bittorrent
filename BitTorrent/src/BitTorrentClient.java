@@ -95,7 +95,7 @@ public class BitTorrentClient {
 			System.out.println("Having Peer at IP " + peer.getIP() + " Port " + peer.getPort());
 		}
 		
-		Peer test_peer = this.contactingPeers.get(0);
+		Peer test_peer = this.contactingPeers.get(1);
 		
 		try {
 
@@ -109,18 +109,25 @@ public class BitTorrentClient {
 			DataInputStream input_stream = new DataInputStream(socket.getInputStream());
 			byte[] response = null; 	        
 	        
-			do {
-				Utils.sleep(500);
+			while(true) {
 				response = MessageHandler.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
 				System.out.println("Client received: " + MessageHandler.is_handshake(response, torrentFile, PEER_ID) + " from peer");
-			} while (!MessageHandler.is_handshake(response, torrentFile, this.PEER_ID));
+				if (MessageHandler.is_handshake(response, torrentFile, PEER_ID)) {
+					break;
+				}
+				Utils.sleep(2000);
+			}
+			
+			while(true) {
+				response = MessageHandler.send_interested(output_stream, input_stream);
+				System.out.println("Client received: " + Utils.byteArrayToByteString(response) + " from peer");
+				if (MessageHandler.is_unchoke(response)) {
+					break;
+				}
+				Utils.sleep(2000);
+			}
 			
 			
-//			do {
-//				response = MessageHandler.send_interested(output_stream, input_stream);
-//				System.out.println("Client received: " + response + " from peer");
-//				System.out.println(MessageHandler.is_unchoke(response));
-//			} while (!MessageHandler.is_unchoke(response));
 //			
 //			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
 //			System.out.println("Client received: " + response + " from peer");

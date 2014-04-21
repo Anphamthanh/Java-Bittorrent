@@ -49,29 +49,16 @@ public class MessageHandler {
 		return 0;
 	}
 	
-	public static void send_unchoke(DataOutputStream output_stream) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream w = new DataOutputStream(baos);
-
+	public static byte[] send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
 		try {
-			
-			w.writeInt(1);
-			w.writeByte(1);
-			w.flush();
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		byte[] unchoke = baos.toByteArray();
-		
-		try {
-			output_stream.write(unchoke);
+			output_stream.writeInt(1);
+			output_stream.writeByte(1);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
 		} 
+
+		return get_response(input_stream, 5); 
 	}
 	
 	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
@@ -82,9 +69,9 @@ public class MessageHandler {
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
-			return null;
 		} 
-		return null;
+
+		return get_response(input_stream, 5);
 	}
 	
 	public static byte[] send_request(DataOutputStream output_stream, DataInputStream input_stream,
@@ -129,8 +116,12 @@ public class MessageHandler {
 		}
 
 		byte[] unchoke = baos.toByteArray();
-
-		return Arrays.equals(msg, unchoke);
+		
+		//TODO fix this, the unchoke message is mixed up with other message in TCP packets, so this always return false;
+		if (Arrays.equals(msg, unchoke)) {
+			return true;
+		}
+		return is_bitfield(msg);
 	}
 
 	public static boolean is_handshake(byte[] msg, TorrentFile torrentFile, String PEER_ID) {		
@@ -159,6 +150,28 @@ public class MessageHandler {
 		byte[] handshake = baos.toByteArray();
 
 		return Arrays.equals(protocol, handshake);
+	}
+	
+	public static boolean is_bitfield(byte[] msg) {		
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);;
+		byte[] protocol_id = new byte[1];
+		System.arraycopy(msg, 4, protocol_id, 0, 1);
+
+		try {
+
+			w.writeByte(5);
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+		byte[] handshake = baos.toByteArray();
+
+		return Arrays.equals(protocol_id, handshake);
 	}
 	
 	public static Message process_input_stream(byte[] input) {
