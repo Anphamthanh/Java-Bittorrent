@@ -8,8 +8,34 @@ import java.util.Arrays;
 public class MessageHandler {
 	
 
-	public static byte[] get_response(DataInputStream input_stream, int expected_length) {
+	public static byte[] get_response(DataInputStream input_stream) {
 
+		byte[] msg_length = new byte[4];
+		try
+		{
+			input_stream.readFully(msg_length);
+		} 
+		catch (Exception ignore) {	
+		}
+		
+
+		ByteBuffer wrapped = ByteBuffer.wrap(msg_length);
+		int length = wrapped.getInt();
+		
+		byte[] byte_array = new byte[length];
+		
+		try
+		{
+			input_stream.readFully(byte_array);
+		} 
+		catch (Exception ignore) {	
+		}
+		
+		return byte_array;
+	}
+	
+	public static byte[] get_handshake_response(DataInputStream input_stream, int expected_length) {
+		
 		byte[] byte_array = new byte[expected_length];
 		
 		try
@@ -35,7 +61,7 @@ public class MessageHandler {
 			ex.printStackTrace();
 			return null;
 		} 
-		return get_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
+		return get_handshake_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
 	
 	public static int send_keepalive(DataOutputStream output_stream, TorrentFile torrentFile, String PEER_ID) {
@@ -58,7 +84,7 @@ public class MessageHandler {
 			ex.printStackTrace();
 		} 
 
-		return get_response(input_stream, 5); 
+		return get_response(input_stream); 
 	}
 	
 	public static byte[] send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
@@ -71,7 +97,7 @@ public class MessageHandler {
 			ex.printStackTrace();
 		} 
 
-		return get_response(input_stream, 5);
+		return get_response(input_stream);
 	}
 	
 	public static byte[] send_request(DataOutputStream output_stream, DataInputStream input_stream,

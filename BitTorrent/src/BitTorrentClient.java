@@ -111,7 +111,7 @@ public class BitTorrentClient {
 	        
 			while(true) {
 				response = MessageHandler.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
-				System.out.println("Client received: " + MessageHandler.is_handshake(response, torrentFile, PEER_ID) + " from peer");
+				System.out.println("Client received: " + Utils.byteArrayToByteString(response)+ " from peer");
 				if (MessageHandler.is_handshake(response, torrentFile, PEER_ID)) {
 					break;
 				}
