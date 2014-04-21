@@ -77,6 +77,7 @@ public class MessageHandler {
 			output_stream.write(new byte[8]);
 			output_stream.write(torrentFile.info_hash_as_binary);
 			output_stream.writeBytes(PEER_ID);	
+			output_stream.flush();
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
@@ -95,6 +96,7 @@ public class MessageHandler {
 		try {
 			output_stream.writeInt(1);
 			output_stream.writeByte(1);
+			output_stream.flush();
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
@@ -108,6 +110,7 @@ public class MessageHandler {
 			output_stream.write(new byte[3]);
 			output_stream.writeByte(1);
 			output_stream.write(2);
+			output_stream.flush();
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
@@ -119,29 +122,17 @@ public class MessageHandler {
 	public static Message send_request(DataOutputStream output_stream, DataInputStream input_stream,
 			int piece_index, int byte_offset, int block_length_in_bytes) {
 		
+		Message response = null;
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream w = new DataOutputStream(baos);
-		Message response;
-
-		try {
-			w.writeInt(13);
-			w.writeByte(6);
-			w.writeInt(piece_index);
-			w.writeInt(byte_offset);
-			w.writeInt(block_length_in_bytes);
-			w.flush();
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		byte[] request = baos.toByteArray();
-		do {
-			Utils.sleep(1000);
+//		do {
+//			Utils.sleep(1000);
 			try {
-				output_stream.write(request);
+				output_stream.writeInt(13);
+				output_stream.writeByte(6);
+				output_stream.writeInt(piece_index);
+				output_stream.writeInt(byte_offset);
+				output_stream.writeInt(block_length_in_bytes);
+				output_stream.flush();
 			}
 			catch(Exception ex) {
 				ex.printStackTrace();
@@ -149,7 +140,7 @@ public class MessageHandler {
 			} 
 
 			response = get_response(input_stream);
-		} while(response == null);
+//		} while(response == null);
 		
 		return response;
 	}
