@@ -71,18 +71,33 @@ public class MessageHandler {
 	
 	public static byte[] send_handshake(DataOutputStream output_stream, DataInputStream input_stream,
 			TorrentFile torrentFile, String PEER_ID) {
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
 		try {
-			output_stream.writeByte(19);
-			output_stream.write("BitTorrent protocol".getBytes());
-			output_stream.write(new byte[8]);
-			output_stream.write(torrentFile.info_hash_as_binary);
-			output_stream.writeBytes(PEER_ID);	
-			output_stream.flush();
+
+			w.writeByte(19);
+			w.write("BitTorrent protocol".getBytes());
+			w.write(new byte[8]);
+			w.write(torrentFile.info_hash_as_binary);
+			w.writeBytes(PEER_ID);	
+			w.flush();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		byte[] handshake = baos.toByteArray();
+
+		try {
+			output_stream.write(handshake);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
 			return null;
 		} 
+		
 		return get_fixed_length_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
 	
@@ -93,27 +108,57 @@ public class MessageHandler {
 		return length == 0;
 	}
 	public static Message send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
 		try {
-			output_stream.writeInt(1);
-			output_stream.writeByte(1);
-			output_stream.flush();
+
+			w.writeInt(1);
+			w.writeByte(1);
+			w.flush();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		byte[] unchoke = baos.toByteArray();
+
+		try {
+			output_stream.write(unchoke);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
+			return null;
 		} 
 
 		return get_response(input_stream); 
 	}
 	
 	public static Message send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
 		try {
-			output_stream.write(new byte[3]);
-			output_stream.writeByte(1);
-			output_stream.write(2);
-			output_stream.flush();
+
+			w.write(new byte[3]);
+			w.writeByte(1);
+			w.write(2);
+			w.flush();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		byte[] interested = baos.toByteArray();
+
+		try {
+			output_stream.write(interested);
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
+			return null;
 		} 
 
 		return get_response(input_stream);
@@ -124,24 +169,35 @@ public class MessageHandler {
 		
 		Message response = null;
 		
-//		do {
-//			Utils.sleep(1000);
-			try {
-				output_stream.writeInt(13);
-				output_stream.writeByte(6);
-				output_stream.writeInt(piece_index);
-				output_stream.writeInt(byte_offset);
-				output_stream.writeInt(block_length_in_bytes);
-				output_stream.flush();
-			}
-			catch(Exception ex) {
-				ex.printStackTrace();
-				return null;
-			} 
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream w = new DataOutputStream(baos);
 
-			response = get_response(input_stream);
-//		} while(response == null);
-		
+		try {
+
+			w.writeInt(13);
+			w.writeByte(6);
+			w.writeInt(piece_index);
+			w.writeInt(byte_offset);
+			w.writeInt(block_length_in_bytes);
+			w.flush();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		byte[] request = baos.toByteArray();
+
+		try {
+			output_stream.write(request);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return null;
+		} 
+
+		response = get_response(input_stream);
+
 		return response;
 	}
 	
