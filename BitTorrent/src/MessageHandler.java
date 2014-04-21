@@ -8,6 +8,7 @@ import java.util.Arrays;
 public class MessageHandler {
 	
 	public static boolean is_piece_available(byte[] bitfield, int piece_index) {
+		
 		int byte_index = piece_index/8;
 		byte data = bitfield[byte_index];
 		int mask = 1<<(7 - (piece_index % 8));
@@ -26,6 +27,10 @@ public class MessageHandler {
 		
 		ByteBuffer length_wrapped = ByteBuffer.wrap(msg_length);
 		int length = length_wrapped.getInt();
+		
+		if (length == 0) {
+			return null;//receive a keep alive message
+		}
 		
 		byte[] msg_id = new byte[1];
 		try
@@ -80,7 +85,12 @@ public class MessageHandler {
 		return get_fixed_length_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
 	
-	
+	public static boolean is_keepalive_stream(byte[] str) {
+		ByteBuffer length_wrapped = ByteBuffer.wrap(str);
+		int length = length_wrapped.getInt();
+		
+		return length == 0;
+	}
 	public static Message send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
 		try {
 			output_stream.writeInt(1);
@@ -112,6 +122,7 @@ public class MessageHandler {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream w = new DataOutputStream(baos);
+		Message response;
 
 		try {
 			w.writeInt(13);
@@ -127,16 +138,18 @@ public class MessageHandler {
 		}
 
 		byte[] request = baos.toByteArray();
-		
-		try {
-			output_stream.write(request);
-		}
-		catch(Exception ex) {
-			ex.printStackTrace();
-			return null;
-		} 
-		
-		Message response = get_response(input_stream);
+		do {
+			Utils.sleep(1000);
+			try {
+				output_stream.write(request);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+				return null;
+			} 
+
+			response = get_response(input_stream);
+		} while(response == null);
 		
 		return response;
 	}
