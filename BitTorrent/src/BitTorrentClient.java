@@ -124,7 +124,7 @@ public class BitTorrentClient {
 
 				while(true) {
 					message = MessageHandler.send_interested(output_stream, input_stream);
-					System.out.println("Client received: \n" + message + " from peer");
+					System.out.println("Client received: \n" + message);
 					if (MessageHandler.is_unchoke(message)) {
 						break;
 					}
@@ -137,9 +137,13 @@ public class BitTorrentClient {
 						continue;
 					}
 				}
-				//			
-				//			response = Utils.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
-				//			System.out.println("Client received: " + response + " from peer");
+				else {
+					current_peer_index++;
+					continue;					
+				}
+							
+				message = MessageHandler.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
+				System.out.println("Client received: \n" + message);
 
 				finished = true;
 				output_stream.close();

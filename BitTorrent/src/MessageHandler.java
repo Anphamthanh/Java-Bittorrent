@@ -116,11 +116,10 @@ public class MessageHandler {
 		return get_response(input_stream);
 	}
 	
-	public static byte[] send_request(DataOutputStream output_stream, DataInputStream input_stream,
+	public static Message send_request(DataOutputStream output_stream, DataInputStream input_stream,
 			int piece_index, int byte_offset, int block_length_in_bytes) {
 		try {
-			output_stream.write(new byte[3]);
-			output_stream.writeByte(13);
+			output_stream.writeInt(13);
 			
 			output_stream.writeByte(6);
 			
@@ -137,7 +136,7 @@ public class MessageHandler {
 			ex.printStackTrace();
 			return null;
 		} 
-		return null;
+		return get_response(input_stream);
 	}
 	
 	public static boolean is_unchoke(Message msg) {		
