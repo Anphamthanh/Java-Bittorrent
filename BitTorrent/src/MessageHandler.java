@@ -92,6 +92,7 @@ public class MessageHandler {
 
 		try {
 			output_stream.write(handshake);
+			output_stream.flush();
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
@@ -100,13 +101,13 @@ public class MessageHandler {
 		
 		return get_fixed_length_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
-	
-	public static boolean is_keepalive_stream(byte[] str) {
-		ByteBuffer length_wrapped = ByteBuffer.wrap(str);
-		int length = length_wrapped.getInt();
-		
-		return length == 0;
-	}
+//	
+//	public static boolean is_keepalive_stream(byte[] str) {
+//		ByteBuffer length_wrapped = ByteBuffer.wrap(str);
+//		int length = length_wrapped.getInt();
+//		
+//		return length == 0;
+//	}
 	public static Message send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -126,6 +127,7 @@ public class MessageHandler {
 
 		try {
 			output_stream.write(unchoke);
+			output_stream.flush();
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
@@ -155,6 +157,7 @@ public class MessageHandler {
 
 		try {
 			output_stream.write(interested);
+			output_stream.flush();
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
@@ -190,6 +193,7 @@ public class MessageHandler {
 
 		try {
 			output_stream.write(request);
+			output_stream.flush();
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
