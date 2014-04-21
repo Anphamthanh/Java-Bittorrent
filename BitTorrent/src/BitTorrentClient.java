@@ -19,7 +19,7 @@ public class BitTorrentClient {
 	private String IP;
 	private String PEER_ID;
 	private String CHARSET = "UTF-8";
-	private int BLOCK_LENGTH = 1<<15;
+	private int BLOCK_LENGTH = 1<<14;
 	private int TOTAL_PIECE = 0;
 	private int PIECE_SIZE = 0;
 	
