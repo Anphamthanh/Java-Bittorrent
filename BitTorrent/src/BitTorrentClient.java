@@ -98,7 +98,7 @@ public class BitTorrentClient {
 		
 		while(!finished) {
 
-			current_peer = this.peer_pool.get(current_peer_index);
+			current_peer = this.peer_pool.get(current_peer_index+3);
 
 			try {
 
@@ -124,6 +124,7 @@ public class BitTorrentClient {
 				Message message;
 
 				while(true) {
+					MessageHandler.send_unchoke(output_stream, input_stream);
 					message = MessageHandler.send_interested(output_stream, input_stream);
 					System.out.println("Client received: \n" + message);
 					if (MessageHandler.is_unchoke(message) || MessageHandler.is_bitfield(message)) {
@@ -132,7 +133,9 @@ public class BitTorrentClient {
 					Utils.sleep(2000);
 				}
 
-				if (MessageHandler.is_bitfield(message)) {					
+				if (MessageHandler.is_bitfield(message)) {							
+					current_bitfield = message.content;			
+					System.out.println("Client received bitfield: " + message);
 					if (!MessageHandler.is_piece_available(message.content, current_piece_index)) {
 						current_peer_index++;
 						continue;
@@ -143,10 +146,14 @@ public class BitTorrentClient {
 					continue;					
 				}
 				
-				current_bitfield = message.content;
-							
-				message = MessageHandler.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
-				System.out.println("Client received: \n" + message);
+				while(true) {
+					message = MessageHandler.send_request(output_stream, input_stream, 0, 0, BLOCK_LENGTH);
+					System.out.println("Client received: \n" + message);
+					if (!MessageHandler.is_choke(message)) {
+						break;
+					}
+					Utils.sleep(2000);
+				}
 
 				finished = true;
 				output_stream.close();

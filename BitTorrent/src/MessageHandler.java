@@ -43,7 +43,7 @@ public class MessageHandler {
 		ByteBuffer id_wrapped = ByteBuffer.wrap(msg_id);
 		byte id = id_wrapped.get(0);
 		
-		byte[] byte_array = new byte[length];
+		byte[] byte_array = new byte[length-1];
 		
 		try
 		{
@@ -134,7 +134,7 @@ public class MessageHandler {
 			return null;
 		} 
 
-		return get_response(input_stream); 
+		return null; 
 	}
 	
 	public static Message send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
@@ -211,6 +211,14 @@ public class MessageHandler {
 		
 		return msg.id == unchoke_id;
 	}
+	
+	public static boolean is_choke(Message msg) {		
+		
+		byte choke_id = 0;
+		
+		return msg.id == choke_id;
+	}
+	
 
 	public static boolean is_handshake(byte[] msg, TorrentFile torrentFile, String PEER_ID) {		
 
