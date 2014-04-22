@@ -38,7 +38,7 @@ public class BitTorrentClient {
 	private int current_peer_index = 0;
 	private Peer current_peer;
 	private boolean finished = false;
-	private String outFile = "/home/noel/git/project_2/BitTorrent/downloaded/";
+	private String outFile = "./downloaded/";
 	
 	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
