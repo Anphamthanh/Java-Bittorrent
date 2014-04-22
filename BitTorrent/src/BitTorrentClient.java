@@ -30,7 +30,6 @@ public class BitTorrentClient {
 	private int downloaded = 0;
 	private int interval = 0;
 	private int left = 0;
-	private HashMap<String, Integer> peerList;
 	private ArrayList<Peer> peer_pool;
 	private int current_piece_index = 0;
 	private int current_block_offset = 0;
@@ -81,7 +80,6 @@ public class BitTorrentClient {
 
 		TrackerResponse trackerResponse = Utils.handleTrackerResponse(byteStream);
 
-		this.peerList = trackerResponse.getPeerList();
 		
 		this.peer_pool = Utils.getPeerArray(trackerResponse.getPeerList());
 		
@@ -137,7 +135,7 @@ public class BitTorrentClient {
 				if (MessageHandler.is_bitfield(message)) {							
 					current_bitfield = message.content;			
 					System.out.println("Client received bitfield: " + message);
-					if (!MessageHandler.is_piece_available(message.content, current_piece_index)) {
+					if (!MessageHandler.is_piece_available(current_bitfield, current_piece_index)) {
 						current_peer_index++;
 						continue;
 					}
@@ -152,6 +150,7 @@ public class BitTorrentClient {
 				}
 				
 				System.out.println("Ready to get data from peer");
+				
 				while(true) {
 					
 					if (current_block_offset >= torrentFile.piece_length){
