@@ -1,21 +1,3 @@
-/*
- * Copyright 2006 Robert Sterling Moore II
- * 
- * This computer program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option) any
- * later version.
- * 
- * This computer program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this computer program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- */
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,19 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-/**
- * Unencodes a .torrent file and stores its data in a TorrentFile object.
- * 
- * @author Robert S. Moore II
- */
+
 public class TorrentFileHandler
 {
-	/*
-	 * This class is used because Java passes by value for primitive data types,
-	 * but passes by reference for Objects. Passing this object instead of a
-	 * simple int allows methods to update the value of the index without using
-	 * global variables.
-	 */
+	
 	private class Index
 	{
 		public int index;
@@ -49,7 +22,6 @@ public class TorrentFileHandler
 		}
 	}
 
-	// Used to determine the next bencoded data type in the file.
 	private final int NULL_TYPE = 0;
 
 	private final int STRING = 1;
@@ -62,16 +34,12 @@ public class TorrentFileHandler
 
 	private final int STRUCTURE_END = 5;
 
-	// Stores the unencoded data.
+
 	private TorrentFile torrent_file;
 	
-	//Unbencodes data
 	private Bencoder bencoder;
 
-	/**
-	 * Constructs a new TorrentFileHandler object
-	 * 
-	 */
+
 	public TorrentFileHandler()
 	{
 		super();
@@ -113,6 +81,7 @@ public class TorrentFileHandler
 						.println("Error: [TorrentFileHandler.java] The file \""
 								+ file_name
 								+ "\" does not exist. Please make sure you have the correct path to the file.");
+				file_stream.close();
 				return null;
 			}
 
@@ -123,6 +92,7 @@ public class TorrentFileHandler
 						.println("Error: [TorrentFileHandler.java] Cannot read from \""
 								+ file_name
 								+ "\". Please make sure the file permissions are set correctly.");
+				file_stream.close();
 				return null;
 			}
 
@@ -130,21 +100,20 @@ public class TorrentFileHandler
 			// http://javaalmanac.com/egs/java.io/File2ByteArray.html
 			file_size_long = file.length();
 
-			// Avoid overflow in the file length
 			if (file_size_long > Integer.MAX_VALUE)
 			{
 				System.err.println("Error: [TorrentFileHandler.java] The file \"" + file_name
 						+ "\" is too large to be read by this class.");
+				file_stream.close();
 				return null;
 			}
 
-			// Initialize the byte array for the file's data
+
 			file_bytes = new byte[(int) file_size_long];
 
 			int file_offset = 0;
 			int bytes_read = 0;
 
-			// Read from the file
 			while (file_offset < file_bytes.length
 					&& (bytes_read = file_stream.read(file_bytes, file_offset,
 							file_bytes.length - file_offset)) >= 0)
@@ -152,15 +121,13 @@ public class TorrentFileHandler
 				file_offset += bytes_read;
 			}
 
-			// Verify that we read everything from the file
+
 			if (file_offset < file_bytes.length)
 			{
+				file_stream.close();
 				throw new IOException("Could not completely read file \""
 						+ file.getName() + "\".");
 			}
-
-			// End of code from
-			// http://javaalmanac.com/egs/java.io/File2ByteArray.html
 
 			file_stream.close();
 
@@ -184,18 +151,6 @@ public class TorrentFileHandler
 		return file_bytes;
 	}
 
-	/**
-	 * Reads the byte at <code>data[index.index]</code> and returns an integer
-	 * based on the value.
-	 * 
-	 * @param data
-	 *            Contains bencoded data.
-	 * @param index
-	 *            A valid index into data that points to the beginning of a
-	 *            bencoded String, Integer, List or Dictionary.
-	 * @return An <code>int</code> based on the value of the byte at
-	 *         <code>data[index.index]</code>.
-	 */
 	private int getEncodedType(byte[] data, Index index)
 	{
 		// The value to be returned
@@ -239,20 +194,7 @@ public class TorrentFileHandler
 		return return_value;
 	}
 
-	/**
-	 * Parses a bencoded String located at <code>data[index.index]</code> and
-	 * returns it as a String object. After being called,
-	 * <code>index.index</code> points to the byte after the end of the String
-	 * (the next data structure).
-	 * 
-	 * @param data
-	 *            Contains bencoded data.
-	 * @param index
-	 *            A valid index into <code>data</code> that points to the
-	 *            beginning of a bencoded String.
-	 * @return A String representing the bencoded String at
-	 *         <code>data[index.index]</code>.
-	 */
+	
 	private String parseString(byte[] data, Index index)
 	{
 		String return_string = null;
@@ -262,7 +204,6 @@ public class TorrentFileHandler
 		boolean first_digit = false;
 		StringBuffer temp_string = new StringBuffer();
 
-		// Determine the length of the integer representing the String's length.
 		while (data[temp_index] != (byte) ':')
 		{
 			if (first_digit)
@@ -273,7 +214,6 @@ public class TorrentFileHandler
 			temp_index++;
 		}
 
-		// Determine the length of the string.
 		while (data[index.index] != (byte) ':')
 		{
 			length_of_string += ((data[index.index] - 48) * power_of_ten);
@@ -281,10 +221,9 @@ public class TorrentFileHandler
 			index.index++;
 		}
 
-		// Skip the ':'
 		index.index++;
 
-		// Extract the string.
+
 		while ((length_of_string > 0) && (index.index <= data.length))
 		{
 			temp_string.append((char) data[index.index]);
@@ -298,20 +237,6 @@ public class TorrentFileHandler
 		return return_string;
 	}
 
-	/**
-	 * Parses a bencoded Integer located at <code>data[index.index]</code> and
-	 * returns it as an Integer object. After being called,
-	 * <code>index.index</code> points to the byte after the end of the
-	 * Integer (the next data structure).
-	 * 
-	 * @param data
-	 *            Contains bencoded data.
-	 * @param index
-	 *            A valid index into <code>data</code> that points to the
-	 *            beginning of a bencoded Integer.
-	 * @return An Integer representing the bencoded Integer at
-	 *         <code>data[index.index]</code>.
-	 */
 	private Integer parseInteger(byte[] data, Index index)
 	{
 		Integer return_integer;
@@ -320,7 +245,7 @@ public class TorrentFileHandler
 		boolean first_digit = false;
 		boolean is_negative = false;
 
-		// Skip the 'i'
+
 		index.index++;
 		
 		if(data[index.index] == (byte)'-')
@@ -330,7 +255,7 @@ public class TorrentFileHandler
 		}
 		int temp_index = index.index;
 
-		// Determine the length of the integer representing the String's length.
+
 		while (data[temp_index] != (byte) 'e')
 		{
 			if (first_digit)
@@ -341,7 +266,7 @@ public class TorrentFileHandler
 			temp_index++;
 		}
 
-		// Determine the length of the string.
+	
 		while (data[index.index] != (byte) 'e')
 		{
 			temp_value += ((data[index.index] - 48) * power_of_ten);
@@ -349,7 +274,6 @@ public class TorrentFileHandler
 			index.index++;
 		}
 
-		// Skip the 'e'
 		index.index++;
 
 		if(is_negative)
@@ -364,24 +288,10 @@ public class TorrentFileHandler
 		return return_integer;
 	}
 
-	/**
-	 * Parses a bencoded List located <code>data[index.index]</code> and
-	 * returns it as a List object. After being called, <code>index.index</code>
-	 * points to the byte after the end of the List (the next data structure).
-	 * 
-	 * @param data
-	 *            Contains bencoded data.
-	 * @param index
-	 *            A valid index into <code>data</code> that points to the
-	 *            beginning of a bencoded List.
-	 * @return A List representing the bencoded List at
-	 *         <code>data[index.index]</code>.
-	 */
 	private Vector parseList(byte[] data, Index index)
 	{
 		Vector return_list = new Vector();
 
-		// Skip the 'l'
 		index.index++;
 
 		int next_data_type = getEncodedType(data, index);
@@ -411,44 +321,28 @@ public class TorrentFileHandler
 			next_data_type = getEncodedType(data, index);
 		}
 
-		//Skip the 'e'
+
 		index.index++;
 		
 		return return_list;
 	}
 
-	/**
-	 * Parses a bencoded Dictionary located <code>data[index.index]</code> and
-	 * returns it as a Map object. After being called, <code>index.index</code>
-	 * points to the byte after the end of the Dictionary (the next data
-	 * structure).
-	 * 
-	 * @param data
-	 *            Contains bencoded data.
-	 * @param index
-	 *            A valid index into <code>data</code> that points to the
-	 *            beginning of a bencoded Dictionary.
-	 * @return A Map representing the bencoded Dictionary at
-	 *         <code>data[index.index]</code>.
-	 */
 	private HashMap parseDictionary(byte[] data, Index index)
 	{
 		HashMap returned_map = new HashMap(10);
 		String key;
 		Object value;
 
-		// Skip the 'd'
 		index.index++;
 
 		int next_data_type = getEncodedType(data, index);
 
-		// As long as there isn't an error or the end of our dictionary, keep
-		// parsing the entries.
+
 		while ((next_data_type != NULL_TYPE)
 				&& (next_data_type != STRUCTURE_END)
 				&& (index.index < data.length))
 		{
-			// The key is ALWAYS a string.
+
 			if (next_data_type != STRING)
 			{
 				System.err
@@ -459,7 +353,6 @@ public class TorrentFileHandler
 
 			key = parseString(data, index);
 
-			// Now get the data type of the value
 			next_data_type = getEncodedType(data, index);
 
 			switch (next_data_type)
@@ -500,7 +393,6 @@ public class TorrentFileHandler
 			}
 
 			returned_map.put(key, value);
-			//System.out.println("[" + key + "/" + value.toString() + "]");
 			
 			next_data_type = getEncodedType(data, index);
 		}

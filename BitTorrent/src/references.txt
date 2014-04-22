@@ -4,3 +4,4 @@ http://www.kristenwidman.com/blog/how-to-write-a-bittorrent-client-part-1/
 http://www.kristenwidman.com/blog/how-to-write-a-bittorrent-client-part-2/
 https://github.com/mpetazzoni/ttorrent/blob/master/src/main/java/com/turn/ttorrent/client/Handshake.java
 https://github.com/ntd172/Torrent-Client/blob/master/torrent/src/message/bittorrent/Piece.java
+http://javaalmanac.com/egs/java.io/File2ByteArray.html
