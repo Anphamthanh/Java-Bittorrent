@@ -34,7 +34,8 @@ public class BitTorrentClient {
 	private int current_peer_index = 0;
 	private Peer current_peer;
 	private boolean finished = false;
-	private String outFile = "./downloaded/";
+	private String outFile = "./downloaded.file";
+	private String temp_file = "./temp.data";
 	
 	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
@@ -91,7 +92,9 @@ public class BitTorrentClient {
 			System.out.println("There is no peer to work with!");
 			return -1;
 		}
+		
 		int attempt = 0;
+		
 		while(!finished) {
 
 			current_peer = this.peer_pool.get(current_peer_index);
@@ -174,6 +177,8 @@ public class BitTorrentClient {
 				while(true) {
 					
 					if (current_block_offset >= PIECE_SIZE){
+						System.out.println(Utils.check_piece(torrentFile, current_piece_index, temp_file));
+						System.exit(0);
 						current_piece_index++;
 						current_block_offset = 0;
 						
@@ -186,7 +191,7 @@ public class BitTorrentClient {
 					message = MessageHandler.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
 					current_block_offset += BLOCK_LENGTH;
 					System.out.printf("Client received data for piece index %d, byte offset %d\n data: %s\n", current_piece_index, current_block_offset, message);
-					Utils.appendToFile(message.getBytes(), outFile);
+					Utils.appendToFile(message.getBytes(), temp_file);
 					if (MessageHandler.is_choke(message)) {
 						System.out.println("Choked");
 						break;

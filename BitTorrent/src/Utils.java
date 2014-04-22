@@ -1,4 +1,7 @@
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -350,9 +353,25 @@ public class Utils {
 	}
 	
 	public static void appendToFile(byte[] data, String filename) throws FileNotFoundException, IOException{
-		try (FileOutputStream output = new FileOutputStream("filename", true)) {
+		try (FileOutputStream output = new FileOutputStream(filename, true)) {
 		    output.write(data);
 		}
+	}
+	
+	public static byte[] read_file(String filename) {
+		File file = new File(filename);
+	    byte[] fileData = new byte[(int) file.length()];
+	    
+	    try {
+		    DataInputStream dis = new DataInputStream(new FileInputStream(file));
+			dis.readFully(fileData);
+		    dis.close();
+		} catch (IOException e) {
+			System.out.println("Exception occurs while reading file " + filename);
+			return new byte[1];
+		}
+	    
+	    return fileData;
 	}
 
 	static void log(Object aThing) {
@@ -377,8 +396,20 @@ public class Utils {
 	/**
 	 * Check piece validity
 	 */
-	public static boolean check_piece() {
-		return false;
+	public static boolean check_piece(TorrentFile torrent_file, int piece_index, String temp_file) {
+		String data_hash = (String) torrent_file.piece_hash_values_as_hex.elementAt(piece_index);
+	    MessageDigest md;
+	    String piece_hash = "";
+		try {
+			md = MessageDigest.getInstance("SHA-1");
+		    piece_hash = byteArray2Hex(md.digest(read_file(temp_file)));
+		} catch (NoSuchAlgorithmException e) {
+			System.out.println("Exception occurs while checking piece!");
+			return false;
+		} 
+		System.out.println("Data " + data_hash);
+		System.out.println("Piece " + piece_hash);
+		return data_hash == piece_hash;
 	}
 
 }
