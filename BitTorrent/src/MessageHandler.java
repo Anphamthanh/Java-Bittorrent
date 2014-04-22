@@ -23,13 +23,15 @@ public class MessageHandler {
 			input_stream.readFully(msg_length);
 		} 
 		catch (Exception ignore) {	
+			System.out.println("Exception occured while trying to get_response!");
+			return new Message(0, (byte) 0, new byte[1]);
 		}
 		
 		ByteBuffer length_wrapped = ByteBuffer.wrap(msg_length);
 		int length = length_wrapped.getInt();
 		
 		if (length == 0) {
-			return null;//receive a keep alive message
+			return new Message(0, (byte) 0, new byte[1]);
 		}
 		
 		byte[] msg_id = new byte[1];
@@ -50,6 +52,8 @@ public class MessageHandler {
 			input_stream.readFully(byte_array);
 		} 
 		catch (Exception ignore) {	
+			System.out.println("Exception occured while trying to get_response!");
+			return new Message(0, (byte) 0, new byte[1]);
 		}
 		
 		return new Message(length, id, byte_array);
@@ -64,6 +68,8 @@ public class MessageHandler {
 			input_stream.readFully(byte_array);
 		} 
 		catch (Exception ignore) {	
+			System.out.println("Exception occured while trying to get_fixed_length_response!");
+			return new byte[1];
 		}
 		
 		return byte_array;
@@ -84,8 +90,8 @@ public class MessageHandler {
 			w.flush();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Exception occured while trying to send_handshake!");
+			return new byte[1];
 		}
 
 		byte[] handshake = baos.toByteArray();
@@ -95,19 +101,13 @@ public class MessageHandler {
 			output_stream.flush();
 		}
 		catch(Exception ex) {
-			ex.printStackTrace();
-			return null;
+			System.out.println("Exception occured while trying to send_handshake!");
+			return new byte[1];
 		} 
 		
 		return get_fixed_length_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
 	}
-//	
-//	public static boolean is_keepalive_stream(byte[] str) {
-//		ByteBuffer length_wrapped = ByteBuffer.wrap(str);
-//		int length = length_wrapped.getInt();
-//		
-//		return length == 0;
-//	}
+
 	public static Message send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -119,8 +119,8 @@ public class MessageHandler {
 			w.flush();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Exception occured while trying to send_unchoke!");
+			return new Message(0, (byte) 0, new byte[1]);
 		}
 
 		byte[] unchoke = baos.toByteArray();
@@ -130,8 +130,8 @@ public class MessageHandler {
 			output_stream.flush();
 		}
 		catch(Exception ex) {
-			ex.printStackTrace();
-			return null;
+			System.out.println("Exception occured while trying to send_unchoke!");
+			return new Message(0, (byte) 0, new byte[1]);
 		} 
 
 		return null; 
@@ -150,8 +150,8 @@ public class MessageHandler {
 			w.flush();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Exception occured while trying to send_interested!");
+			return new Message(0, (byte) 0, new byte[1]);
 		}
 
 		byte[] interested = baos.toByteArray();
@@ -161,8 +161,8 @@ public class MessageHandler {
 			output_stream.flush();
 		}
 		catch(Exception ex) {
-			ex.printStackTrace();
-			return null;
+			System.out.println("Exception occured while trying to send_interested!");
+			return new Message(0, (byte) 0, new byte[1]);
 		} 
 
 		return get_response(input_stream);
@@ -186,8 +186,8 @@ public class MessageHandler {
 			w.flush();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Exception occured while trying to send_request!");
+			return new Message(0, (byte) 0, new byte[1]);
 		}
 
 		byte[] request = baos.toByteArray();
@@ -197,8 +197,8 @@ public class MessageHandler {
 			output_stream.flush();
 		}
 		catch(Exception ex) {
-			ex.printStackTrace();
-			return null;
+			System.out.println("Exception occured while trying to send_request!");
+			return new Message(0, (byte) 0, new byte[1]);
 		} 
 
 		response = get_response(input_stream);
@@ -239,8 +239,7 @@ public class MessageHandler {
 			w.flush();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Exception occured while trying to check handshake!");
 			return false;
 		}
 
