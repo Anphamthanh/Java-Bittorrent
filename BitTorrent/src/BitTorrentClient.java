@@ -8,15 +8,12 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.apache.commons.io.IOUtils;
 
 
 public class BitTorrentClient {
 	
 	private int PORT_NUMBER;
-	private String IP;
 	private String PEER_ID;
 	private String CHARSET = "UTF-8";
 	private int BLOCK_LENGTH = 1<<14;
@@ -29,7 +26,6 @@ public class BitTorrentClient {
 	private static boolean COMPACT = true; 
 	private int uploaded = 0;
 	private int downloaded = 0;
-	private int interval = 0;
 	private int left = 0;
 	private ArrayList<Peer> peer_pool;
 	private int current_piece_index = 0;
@@ -42,7 +38,7 @@ public class BitTorrentClient {
 	
 	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
-		IP = Utils.getIP();
+		Utils.getIP();
 		this.PORT_NUMBER = port;
 		this.PEER_ID = Utils.calculatePeerID();
 		
@@ -177,7 +173,7 @@ public class BitTorrentClient {
 				attempt = 0;
 				while(true) {
 					
-					if (current_block_offset >= torrentFile.piece_length){
+					if (current_block_offset >= PIECE_SIZE){
 						current_piece_index++;
 						current_block_offset = 0;
 						
