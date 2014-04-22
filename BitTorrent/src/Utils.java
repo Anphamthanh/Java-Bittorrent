@@ -357,5 +357,12 @@ public class Utils {
 	static void log(Object aThing) {
 		System.out.println(String.valueOf(aThing));
 	}
+	
+	/**
+	 * Check piece validity
+	 */
+	public static boolean check_piece() {
+		return false;
+	}
 
 }

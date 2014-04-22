@@ -22,6 +22,7 @@ public class BitTorrentClient {
 	private int BLOCK_LENGTH = 1<<14;
 	private int TOTAL_PIECE = 0;
 	private int PIECE_SIZE = 0;
+	private int MAX_ATTEMPT = 3;
 	
 	private TorrentFileHandler torrentFileHandler;
 	private TorrentFile torrentFile;
@@ -94,10 +95,10 @@ public class BitTorrentClient {
 			System.out.println("There is no peer to work with!");
 			return -1;
 		}
-		
+		int attempt = 0;
 		while(!finished) {
 
-			current_peer = this.peer_pool.get(current_peer_index+3);
+			current_peer = this.peer_pool.get(current_peer_index);
 
 			try {
 
@@ -111,6 +112,7 @@ public class BitTorrentClient {
 				DataInputStream input_stream = new DataInputStream(socket.getInputStream());
 				byte[] response = null; 	        
 
+				attempt = 0;
 				while(true) {
 					response = MessageHandler.send_handshake(output_stream, input_stream, torrentFile, this.PEER_ID);
 					System.out.println("Client received: " + Utils.byteArrayToByteString(response)+ " from peer");
@@ -118,9 +120,20 @@ public class BitTorrentClient {
 						break;
 					}
 					Utils.sleep(2000);
+					attempt++;
+					if (attempt > MAX_ATTEMPT) {
+						System.out.println("Peer is not responding, switching peer...");
+						current_peer_index = (current_peer_index + 1) % peer_pool.size();
+						break;
+					}
+				}
+				
+				if (attempt > MAX_ATTEMPT) {
+					continue;
 				}
 
 				Message message;
+				attempt = 0;
 
 				while(true) {
 					MessageHandler.send_unchoke(output_stream, input_stream);
@@ -130,6 +143,16 @@ public class BitTorrentClient {
 						break;
 					}
 					Utils.sleep(2000);
+					attempt++;
+					if (attempt > MAX_ATTEMPT) {
+						System.out.println("Peer is not responding, switching peer...");
+						current_peer_index = (current_peer_index + 1) % peer_pool.size();
+						break;
+					}
+				}
+				
+				if (attempt > MAX_ATTEMPT) {
+					continue;
 				}
 
 				if (MessageHandler.is_bitfield(message)) {							
@@ -151,13 +174,15 @@ public class BitTorrentClient {
 				
 				System.out.println("Ready to get data from peer");
 				
+				attempt = 0;
 				while(true) {
 					
 					if (current_block_offset >= torrentFile.piece_length){
 						current_piece_index++;
 						current_block_offset = 0;
 						
-						if (current_piece_index >= torrentFile.pieces){
+						if (current_piece_index >= TOTAL_PIECE){
+							finished = true;
 							break;
 						}
 					}
@@ -171,10 +196,19 @@ public class BitTorrentClient {
 						break;
 					}
 					Utils.sleep(2000);
+					attempt++;
+					if (attempt > MAX_ATTEMPT) {
+						System.out.println("Peer is not responding, switching peer...");
+						current_peer_index = (current_peer_index + 1) % peer_pool.size();
+						break;
+					}
 				}
 				
-				System.out.printf("Done downloading");
-				finished = true;
+				if (attempt > MAX_ATTEMPT) {
+					continue;
+				}
+				
+				System.out.printf("File has been successfully downloaded!");
 				output_stream.close();
 				input_stream.close();
 				socket.close();
