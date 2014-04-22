@@ -1,0 +1,24 @@
+BitTorrent Project Breakdown
+
+BitTorrent
+1) parse torrent 10%                        Done
+2) hash/handshake 25%                       Done
+3) parse message 25%                        Done
+4) request 15%                              Done
+5) receive blocks 15%                       Done
+6) combine + verify 10%                     Working
+
+ 
+
+Extra Credit
+tracker + (1)                               Done
+multiple peers/threading +++ (3)            
+resume ++ (2)
+sending files +++ (3)
+incoming + (1)
+
+ 
+
+***Extra credit will not be points directly added to the project but instead they will be "separate grades" 
+that will affect fencepost grades, allowing for people to potentially bump up into the next lettergrade, otherwise has no effect. 
+This is to avoid affecting curves.
