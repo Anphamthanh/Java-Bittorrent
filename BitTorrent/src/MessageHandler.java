@@ -139,6 +139,7 @@ public class MessageHandler {
 	
 	public static Message send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
 		
+		System.out.println("Sending interested message");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream w = new DataOutputStream(baos);
 		try {

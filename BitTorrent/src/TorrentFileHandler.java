@@ -545,6 +545,8 @@ public class TorrentFileHandler
 			return false;
 		}
 		
+		torrent_file.pieces = torrent_file.file_length/torrent_file.piece_length;
+		
 		return true;
 		
 	}

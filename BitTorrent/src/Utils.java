@@ -1,7 +1,11 @@
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -18,33 +22,34 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class Utils {
-	
+
 	private static final String CLIENT_ID = "-AP6969-";
-	
+
 	@SuppressWarnings("unchecked")
 	public static TrackerResponse handleTrackerResponse(byte[] responseStream) {
-		
-		int complete, incomplete, interval;
-		Bencoder bencoder 						= new Bencoder();
-		HashMap<String, Object> reponseHashMap 	= new HashMap<String, Object>();
-		String rawPeerList	 					= "";
-		HashMap<String, Integer> peerList 		= new HashMap<String, Integer>();
 
-		reponseHashMap 	= bencoder.unbencodeDictionary(responseStream);		
-		complete 		= (int) reponseHashMap.get("complete");
-		incomplete 		= (int) reponseHashMap.get("incomplete");
-		interval 		= (int) reponseHashMap.get("interval");
-		rawPeerList 	= (String) reponseHashMap.get("peers");
-		peerList 		= parsePeerList(rawPeerList);
-		
+		int complete, incomplete, interval;
+		Bencoder bencoder = new Bencoder();
+		HashMap<String, Object> reponseHashMap = new HashMap<String, Object>();
+		String rawPeerList = "";
+		HashMap<String, Integer> peerList = new HashMap<String, Integer>();
+
+		reponseHashMap = bencoder.unbencodeDictionary(responseStream);
+		complete = (int) reponseHashMap.get("complete");
+		incomplete = (int) reponseHashMap.get("incomplete");
+		interval = (int) reponseHashMap.get("interval");
+		rawPeerList = (String) reponseHashMap.get("peers");
+		peerList = parsePeerList(rawPeerList);
+
 		TrackerResponse response = new TrackerResponse(complete, incomplete,
 				interval, peerList);
-	
+
 		return response;
 	}
 
 	/**
 	 * Parse the raw peer list to a hashmap<ip, port>
+	 * 
 	 * @param rawPeerList
 	 * @return
 	 */
@@ -53,7 +58,7 @@ public class Utils {
 		char[] charStream = rawPeerList.toCharArray();
 		int i = 0;
 
-		while (i < rawPeerList.length()){
+		while (i < rawPeerList.length()) {
 			String ip = "";
 			int port = 0;
 			ip = String.format("%s.%s.%s.%s",
@@ -61,23 +66,23 @@ public class Utils {
 					charToUnsignedInt(charStream[i + 1]),
 					charToUnsignedInt(charStream[i + 2]),
 					charToUnsignedInt(charStream[i + 3]));
-			
+
 			port = parsePort(charStream[i + 4], charStream[i + 5]);
-			
+
 			retHashMap.put(ip, port);
 			i += 6;
 		}
 
 		return retHashMap;
 	}
-	
+
 	/**
 	 * 
 	 * @param char to be converted
 	 * @return
 	 */
-	private static int charToUnsignedInt(char c){
-		return (int)((c) & 0xFF);
+	private static int charToUnsignedInt(char c) {
+		return (int) ((c) & 0xFF);
 	}
 
 	/**
@@ -87,44 +92,46 @@ public class Utils {
 	 *            char
 	 * @param lower
 	 *            char
-	 * @return port number in int from the bytes 
+	 * @return port number in int from the bytes
 	 */
-	private static int parsePort(char high, char low){
-		int retVal 	= 0;
-		retVal 		= retVal | (int)(((high & 0xff) << 8) | (low & 0xff));
+	private static int parsePort(char high, char low) {
+		int retVal = 0;
+		retVal = retVal | (int) (((high & 0xff) << 8) | (low & 0xff));
 		return retVal;
 	}
-	
+
 	/**
 	 * Print out peer list
+	 * 
 	 * @param peerList
 	 */
-	public static void dumpPeerList(HashMap<String, Integer> peerList){
+	public static void dumpPeerList(HashMap<String, Integer> peerList) {
 		Set<String> keys = peerList.keySet();
-		
+
 		System.out.println("IP:port");
-		
-		for(String itr: keys){
+
+		for (String itr : keys) {
 			System.out.print(itr + ":" + peerList.get(itr) + "\n");
 		}
 	}
-	
+
 	/**
 	 * Create an array of peer list
+	 * 
 	 * @param peerList
 	 */
-	public static ArrayList<Peer> getPeerArray(HashMap<String, Integer> peerList){
+	public static ArrayList<Peer> getPeerArray(HashMap<String, Integer> peerList) {
 		Set<String> keys = peerList.keySet();
-		
+
 		ArrayList<Peer> peer_list = new ArrayList<Peer>();
-		
-		for(String itr: keys){
+
+		for (String itr : keys) {
 			peer_list.add(new Peer(itr, peerList.get(itr)));
 		}
-		
+
 		return peer_list;
 	}
-	
+
 	private static Pattern pattern;
 	private static Matcher matcher;
 
@@ -145,16 +152,18 @@ public class Utils {
 		matcher = pattern.matcher(ip);
 		return matcher.matches();
 	}
-	
+
 	/**
 	 * Compute machine external IP that later used for compute peer ID
+	 * 
 	 * @return
 	 * @throws SocketException
 	 */
 	public static String getIP() throws SocketException {
 		String ip = "";
-		Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-		
+		Enumeration<NetworkInterface> e = NetworkInterface
+				.getNetworkInterfaces();
+
 		while (e.hasMoreElements()) {
 			NetworkInterface n = e.nextElement();
 			Enumeration<InetAddress> ee = n.getInetAddresses();
@@ -168,12 +177,13 @@ public class Utils {
 				}
 			}
 		}
-		
+
 		return ip;
 	}
 
 	/**
 	 * compute Peer Id from ip and port
+	 * 
 	 * @param port
 	 * @param ip
 	 * @return
@@ -184,25 +194,26 @@ public class Utils {
 		byte[] hash = generateSHA1Hash(stringToBytesASCII(buffer));
 		byte[] twelveBytesHash = new byte[12];
 		System.arraycopy(hash, 7, twelveBytesHash, 0, 12);
-		
+
 		peerID = CLIENT_ID;// + byteArrayToByteString(twelveBytesHash);
-		
-		for (int i = 0; i < twelveBytesHash.length; i++){
+
+		for (int i = 0; i < twelveBytesHash.length; i++) {
 			peerID = Byte.toString(twelveBytesHash[i]);
 		}
 
 		return peerID;
 	}
-	
+
 	/**
 	 * Calculate PeerID
+	 * 
 	 * @return
 	 */
 	public static String calculatePeerID() {
 		String peerID = CLIENT_ID + RandomStringUtils.randomAlphanumeric(12);
 		return peerID;
 	}
-	
+
 	private static byte[] stringToBytesASCII(String str) {
 		char[] buffer = str.toCharArray();
 		byte[] b = new byte[buffer.length];
@@ -211,12 +222,11 @@ public class Utils {
 		}
 		return b;
 	}
-	
+
 	/*
 	 * Stolen from byteArrayToByteString
 	 */
-	public static String byteArrayToURLString(byte in[])
-	{
+	public static String byteArrayToURLString(byte in[]) {
 		byte ch = 0x00;
 		int i = 0;
 		if (in == null || in.length <= 0)
@@ -226,20 +236,16 @@ public class Utils {
 				"A", "B", "C", "D", "E", "F" };
 		StringBuffer out = new StringBuffer(in.length * 2);
 
-		while (i < in.length)
-		{
+		while (i < in.length) {
 			// First check to see if we need ASCII or HEX
 			if ((in[i] >= '0' && in[i] <= '9')
 					|| (in[i] >= 'a' && in[i] <= 'z')
 					|| (in[i] >= 'A' && in[i] <= 'Z') || in[i] == '$'
 					|| in[i] == '-' || in[i] == '_' || in[i] == '.'
-					|| in[i] == '+' || in[i] == '!')
-			{
+					|| in[i] == '+' || in[i] == '!') {
 				out.append((char) in[i]);
 				i++;
-			}
-			else
-			{
+			} else {
 				out.append('%');
 				ch = (byte) (in[i] & 0xF0); // Strip off high nibble
 				ch = (byte) (ch >>> 4); // shift the bits down
@@ -274,8 +280,7 @@ public class Utils {
 	 * 
 	 */
 	// Taken from http://www.devx.com/tips/Tip/13540
-	public static String byteArrayToByteString(byte in[])
-	{
+	public static String byteArrayToByteString(byte in[]) {
 		byte ch = 0x00;
 		int i = 0;
 		if (in == null || in.length <= 0)
@@ -285,8 +290,7 @@ public class Utils {
 				"A", "B", "C", "D", "E", "F" };
 		StringBuffer out = new StringBuffer(in.length * 2);
 
-		while (i < in.length)
-		{
+		while (i < in.length) {
 			ch = (byte) (in[i] & 0xF0); // Strip off high nibble
 			ch = (byte) (ch >>> 4); // shift the bits down
 			ch = (byte) (ch & 0x0F); // must do this is high order bit is on!
@@ -303,33 +307,59 @@ public class Utils {
 		return rslt;
 	}
 
-	public static byte[] generateSHA1Hash(byte[] bytes)
-	{
-		try
-		{
+	public static byte[] generateSHA1Hash(byte[] bytes) {
+		try {
 			byte[] hash = new byte[20];
 			MessageDigest sha = MessageDigest.getInstance("SHA-1");
 			hash = sha.digest(bytes);
-			
+
 			return hash;
-		}
-		catch (NoSuchAlgorithmException e)
-		{
+		} catch (NoSuchAlgorithmException e) {
 			System.err
 					.println("Error: [TorrentFileHandler.java] \"SHA-1\" is not a valid algorithm name.");
 			System.exit(1);
 		}
 		return null;
 	}
-	
 
 	public static void sleep(int timer) {
 		try {
-		    Thread.sleep(timer);
-		} catch(InterruptedException ex) {
-		    Thread.currentThread().interrupt();
+			Thread.sleep(timer);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	/**
+	 * Write a byte array to the given file. Writing binary data is
+	 * significantly simpler than reading it.
+	 */
+	public static void write(byte[] aInput, String aOutputFileName) {
+		log("Writing binary file...");
+		try {
+			OutputStream output = null;
+			try {
+				output = new BufferedOutputStream(new FileOutputStream(
+						aOutputFileName));
+				output.write(aInput);
+			} finally {
+				output.close();
+			}
+		} catch (FileNotFoundException ex) {
+			log("File not found.");
+		} catch (IOException ex) {
+			log(ex);
 		}
 	}
 	
-	
+	public static void appendToFile(byte[] data, String filename) throws FileNotFoundException, IOException{
+		try (FileOutputStream output = new FileOutputStream("filename", true)) {
+		    output.write(data);
+		}
+	}
+
+	static void log(Object aThing) {
+		System.out.println(String.valueOf(aThing));
+	}
+
 }

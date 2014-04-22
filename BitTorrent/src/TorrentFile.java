@@ -78,6 +78,8 @@ public class TorrentFile
 	 * The collection of peer list
 	 */
 	public HashMap peer_list;
+	
+	public int pieces;
 	/**
 	 * Creates a new TorrentFile object with empty fields.
 	 *
@@ -95,5 +97,6 @@ public class TorrentFile
 		peer_list = new HashMap();
 		file_length = -1;
 		piece_length = -1;
+		pieces = 0;
 	}	
 }

@@ -16,6 +16,10 @@ public class Message {
 		ret.append("Message id = " + id + "\nLength = " + length + "\nContent: " + Utils.byteArrayToByteString(content) +"\n");
 		return ret.toString();
 	}
+	
+	public byte[] getBytes(){
+		return content;
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

@@ -38,7 +38,7 @@ public class BitTorrentClient {
 	private int current_peer_index = 0;
 	private Peer current_peer;
 	private boolean finished = false;
-	
+	private String outFile = "/home/noel/git/project_2/BitTorrent/downloaded/";
 	
 	
 	public BitTorrentClient(int port, String torrentPath) throws SocketException{
@@ -56,6 +56,7 @@ public class BitTorrentClient {
 		left = torrentFile.file_length - downloaded;
 		TOTAL_PIECE = torrentFile.piece_hash_values_as_hex.size();
 		PIECE_SIZE = torrentFile.piece_length;
+		outFile = outFile + "downloaded";
 	}
 	
 	public int contactTracker() throws MalformedURLException, IOException{
@@ -146,15 +147,38 @@ public class BitTorrentClient {
 					continue;					
 				}
 				
+				while (!MessageHandler.is_unchoke(message)){
+					message = MessageHandler.send_interested(output_stream, input_stream);					
+				}
+				
+				System.out.println("Ready to get data from peer");
+				int pieceIndex = 0;
+				int byteOffset = 0;
+				int blocks = 0;
 				while(true) {
-					message = MessageHandler.send_request(output_stream, input_stream, 0, 0, BLOCK_LENGTH);
-					System.out.println("Client received: \n" + message);
-					if (!MessageHandler.is_choke(message)) {
+					
+					if (byteOffset >= torrentFile.piece_length){
+						pieceIndex++;
+						
+						if (pieceIndex >= torrentFile.pieces){
+							break;
+						}
+							
+						byteOffset = 0;
+					}
+					
+					message = MessageHandler.send_request(output_stream, input_stream, pieceIndex, byteOffset, BLOCK_LENGTH);
+					byteOffset += BLOCK_LENGTH;
+					System.out.printf("Client received data for piece index %d, byte offset %d\n data: %s\n", pieceIndex, byteOffset, message);
+					Utils.appendToFile(message.getBytes(), outFile);
+					if (MessageHandler.is_choke(message)) {
+						System.out.println("Choked");
 						break;
 					}
 					Utils.sleep(2000);
 				}
-
+				
+				System.out.printf("Done downloading");
 				finished = true;
 				output_stream.close();
 				input_stream.close();
