@@ -152,24 +152,20 @@ public class BitTorrentClient {
 				}
 				
 				System.out.println("Ready to get data from peer");
-				int pieceIndex = 0;
-				int byteOffset = 0;
-				int blocks = 0;
 				while(true) {
 					
-					if (byteOffset >= torrentFile.piece_length){
-						pieceIndex++;
+					if (current_block_offset >= torrentFile.piece_length){
+						current_piece_index++;
+						current_block_offset = 0;
 						
-						if (pieceIndex >= torrentFile.pieces){
+						if (current_piece_index >= torrentFile.pieces){
 							break;
 						}
-							
-						byteOffset = 0;
 					}
 					
-					message = MessageHandler.send_request(output_stream, input_stream, pieceIndex, byteOffset, BLOCK_LENGTH);
-					byteOffset += BLOCK_LENGTH;
-					System.out.printf("Client received data for piece index %d, byte offset %d\n data: %s\n", pieceIndex, byteOffset, message);
+					message = MessageHandler.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
+					current_block_offset += BLOCK_LENGTH;
+					System.out.printf("Client received data for piece index %d, byte offset %d\n data: %s\n", current_piece_index, current_block_offset, message);
 					Utils.appendToFile(message.getBytes(), outFile);
 					if (MessageHandler.is_choke(message)) {
 						System.out.println("Choked");
