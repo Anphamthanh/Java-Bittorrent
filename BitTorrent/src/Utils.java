@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -356,6 +357,21 @@ public class Utils {
 
 	static void log(Object aThing) {
 		System.out.println(String.valueOf(aThing));
+	}
+	
+	public static String get_piece_SHA1(byte[] piece) throws NoSuchAlgorithmException{
+	    MessageDigest md = MessageDigest.getInstance("SHA-1"); 
+	    return byteArray2Hex(md.digest(piece));
+	}
+
+	private static String byteArray2Hex(final byte[] hash) {
+	    Formatter formatter = new Formatter();
+	    for (byte b : hash) {
+	        formatter.format("%02x", b);
+	    }
+	    String result = formatter.toString();
+	    formatter.close();
+	    return result;
 	}
 	
 	/**

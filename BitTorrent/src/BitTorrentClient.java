@@ -159,12 +159,12 @@ public class BitTorrentClient {
 					current_bitfield = message.content;			
 					System.out.println("Client received bitfield: " + message);
 					if (!MessageHandler.is_piece_available(current_bitfield, current_piece_index)) {
-						current_peer_index++;
+						current_peer_index = (current_peer_index + 1) % peer_pool.size();
 						continue;
 					}
 				}
 				else {
-					current_peer_index++;
+					current_peer_index = (current_peer_index + 1) % peer_pool.size();
 					continue;					
 				}
 				
