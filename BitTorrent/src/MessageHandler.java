@@ -105,7 +105,7 @@ public class MessageHandler {
 			return new byte[1];
 		} 
 		
-		return get_fixed_length_response(input_stream, 49 + "BitTorrent protocol".getBytes().length);
+		return get_fixed_length_response(input_stream, 1 + "BitTorrent protocol".getBytes().length);
 	}
 
 	public static Message send_unchoke(DataOutputStream output_stream, DataInputStream input_stream) {
@@ -234,9 +234,6 @@ public class MessageHandler {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream w = new DataOutputStream(baos);
 		
-		int protocol_length = 1 + "BitTorrent protocol".getBytes().length;
-		byte[] protocol = new byte[protocol_length];
-		System.arraycopy(msg, 0, protocol, 0, protocol_length);
 
 		try {
 
@@ -253,7 +250,7 @@ public class MessageHandler {
 
 		byte[] handshake = baos.toByteArray();
 
-		return Arrays.equals(protocol, handshake);
+		return Arrays.equals(msg, handshake);
 	}
 	
 	public static boolean is_bitfield(Message msg) {		
