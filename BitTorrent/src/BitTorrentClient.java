@@ -189,6 +189,12 @@ public class BitTorrentClient {
 					}
 					
 					message = MessageHandler.send_request(output_stream, input_stream, current_piece_index, current_block_offset, BLOCK_LENGTH);
+					if (MessageHandler.is_have(message)) {
+						attempt += MAX_ATTEMPT;
+						System.out.println("Peer is not responding, switching peer...");
+						current_peer_index = (current_peer_index + 1) % peer_pool.size();
+						break;
+					}
 					current_block_offset += BLOCK_LENGTH;
 					System.out.printf("Client received data for piece index %d, byte offset %d\n data: %s\n", current_piece_index, current_block_offset, message);
 					Utils.appendToFile(message.getBytes(), temp_file);
