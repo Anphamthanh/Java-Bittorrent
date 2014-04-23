@@ -220,6 +220,14 @@ public class MessageHandler {
 		return msg.id == choke_id;
 	}
 	
+	public static boolean is_have(Message msg) {		
+		
+		byte have_id = 4;
+		
+		return msg.id == have_id;
+	}
+	
+	
 
 	public static boolean is_handshake(byte[] msg, TorrentFile torrentFile, String PEER_ID) {		
 
