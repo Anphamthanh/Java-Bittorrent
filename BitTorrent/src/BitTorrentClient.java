@@ -135,8 +135,8 @@ public class BitTorrentClient {
 				attempt = 0;
 
 				while(true) {
-					MessageHandler.send_unchoke(output_stream, input_stream);
-					message = MessageHandler.send_interested(output_stream, input_stream);
+					message = MessageHandler.send_unchoke(output_stream, input_stream);
+//					message = MessageHandler.send_interested(output_stream, input_stream);
 					System.out.println("Client received: \n" + message);
 					if (MessageHandler.is_unchoke(message) || MessageHandler.is_bitfield(message)) {
 						break;

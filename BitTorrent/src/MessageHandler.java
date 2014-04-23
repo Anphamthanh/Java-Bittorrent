@@ -134,7 +134,7 @@ public class MessageHandler {
 			return new Message(0, (byte) 0, new byte[1]);
 		} 
 
-		return null; 
+		return new Message(0, (byte) 0, new byte[1]);
 	}
 	
 	public static Message send_interested(DataOutputStream output_stream, DataInputStream input_stream) {
